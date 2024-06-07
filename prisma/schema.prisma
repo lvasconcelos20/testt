@@ -8,6 +8,12 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+enum Prioridade {
+  baixa
+  media
+  alta
+}
+
 
 model Member {
   id       Int    @id @default(autoincrement())
@@ -15,3 +21,14 @@ model Member {
   name     String
 
 }
+
+
+model Tarefa {
+  id Int @id @default(autoincrement())
+  name String
+  decricao String @db.VarChar(140)
+  finalizada Boolean @default(false)
+  data_termino DateTime
+  prioridade  Prioridade 
+}
+
