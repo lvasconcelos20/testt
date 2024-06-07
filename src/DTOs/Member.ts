@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const Member = z.object({
   id: z 
   .string ({
-
   }),
   name: z
   .string({
