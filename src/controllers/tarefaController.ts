@@ -1,124 +1,146 @@
 import { Request, Response, NextFunction } from 'express';
-import TarefaRepository from '../repository/TarefaRepository'; // Importa o repositório
-import { Prisma, Tarefa } from '@prisma/client'; // Importa Prisma para manipular tipos
+import { TarefaRepository } from '../repository'; // Importa o repositório
+import { UpdateTarefa, Tarefa} from '../DTOs';
 
-export class TarefaController {
-  public async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+
+
+  
+  export class TarefaController {
+    async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+      try {
+        const tarefaData = Tarefa.parse(req.body);
+        const existingTarefa = await TarefaRepository.findTarefaByName(tarefaData.name);
+  
+        if (existingTarefa) {
+          return res.status(400).json({ message: 'Uma tarefa com este nome já existe' });
+        }
+  
+        // Se a tarefa estiver finalizada, verifica se a data de término é fornecida e converte para string se for o caso
+        if (tarefaData.finalizada) {
+          if (tarefaData.data_termino) {
+            tarefaData.data_termino = new Date(tarefaData.data_termino).toISOString();
+          } else {
+            return res.status(400).json({ message: 'Data de término é obrigatória para tarefas finalizadas' });
+          }
+        }
+  
+        // Cria a tarefa
+        const newTarefa = await TarefaRepository.create(tarefaData);
+  
+        res.status(201).json({
+          message: 'Tarefa criada com sucesso',
+          tarefa: newTarefa,
+        });
+      } catch (error) {
+        next(error); // Passa o erro para o próximo middleware de tratamento de erro
+      }
+    }
+   
+  async read(req: Request, res: Response, next: NextFunction) {
     try {
-      const tarefaData: Prisma.TarefaCreateInput = req.body;
+      const { memberId } = req.params;
 
-      // Verifica se já existe uma tarefa com o mesmo nome
-      const existingTarefa = await TarefaRepository.findByName(tarefaData.name);
-      if (existingTarefa) {
-        return res.status(400).json({ message: 'Uma tarefa com este nome já existe' });
+      const member = await TarefaRepository.findTarefaById(Number(memberId));
+
+      if (!member) {
+        return next({
+          status: 404,
+          message: 'Membro não encontrado',
+        });
       }
 
-      // Cria a tarefa
-      const newTarefa = await TarefaRepository.create(tarefaData);
-
-      return res.status(201).json({
-        message: 'Tarefa criada com sucesso',
-        tarefa: newTarefa,
-      });
+      res.status(200).json(member);
     } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
+      next(error);
     }
   }
-
-  public async read(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    try {
-      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-
-      // Verifica se existe a tarefa
-      const tarefa = await TarefaRepository.findById(Number(id));
-      if (!tarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+      try {
+        const { id } = req.params;
+        const numericId = Number(id);
+  
+        if (isNaN(numericId)) {
+          return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+        }
+  
+        const tarefaData = UpdateTarefa.parse(req.body);
+  
+        const existingTarefa = await TarefaRepository.findTarefaById(numericId);
+        if (!existingTarefa) {
+          return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+  
+        const updatedTarefa = await TarefaRepository.update(numericId, tarefaData);
+        return res.json({
+          message: 'Tarefa atualizada com sucesso',
+          tarefa: updatedTarefa,
+        });
+      } catch (error) {
+        next(error);
       }
-
-      return res.json({
-        message: 'Tarefa encontrada com sucesso',
-        tarefa,
-      });
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
     }
-  }
-
-  public async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    try {
-      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-      const tarefaData: Prisma.TarefaUpdateInput = req.body;
-
-      // Verifica se existe a tarefa
-      const existingTarefa = await TarefaRepository.findById(Number(id));
-      if (!existingTarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+  
+    async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+      try {
+        const { id } = req.params;
+        const numericId = Number(id);
+  
+        if (isNaN(numericId)) {
+          return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+        }
+  
+        const existingTarefa = await TarefaRepository.findTarefaById(numericId);
+        if (!existingTarefa) {
+          return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+  
+        const updatedTarefa = await TarefaRepository.update(numericId, {
+          finalizada: true,
+          data_termino: new Date().toISOString(),
+        });
+  
+        return res.json({
+          message: 'Tarefa finalizada com sucesso',
+          tarefa: updatedTarefa,
+        });
+      } catch (error) {
+        next(error);
       }
-
-      // Atualiza a tarefa
-      const updatedTarefa = await TarefaRepository.update(Number(id), tarefaData);
-
-      return res.json({
-        message: 'Tarefa atualizada com sucesso',
-        tarefa: updatedTarefa,
-      });
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
     }
-  }
-
-  public async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    try {
-      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-
-      // Verifica se existe a tarefa
-      const existingTarefa = await TarefaRepository.findById(Number(id));
-      if (!existingTarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+  
+    async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+      try {
+        const { id } = req.params;
+        const numericId = Number(id);
+  
+        if (isNaN(numericId)) {
+          return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+        }
+  
+        const tarefa = await TarefaRepository.delete(numericId);
+        if (!tarefa) {
+          return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+  
+        return res.json({
+          message: 'Tarefa deletada com sucesso',
+          tarefa,
+        });
+      } catch (error) {
+        next(error);
       }
-
-      // Atualiza a tarefa com finalização
-      const updatedTarefa = await TarefaRepository.update(Number(id), {
-        finalizada: true,
-        data_termino: new Date().toISOString(),
-      });
-
-      return res.json({
-        message: 'Tarefa finalizada com sucesso',
-        tarefa: updatedTarefa,
-      });
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
     }
-  }
-
-  public async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    try {
-      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-      const tarefa = await TarefaRepository.delete(Number(id));
-      if (!tarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+  
+    async listAll(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+      try {
+        const tarefas = await TarefaRepository.findAll();
+  
+        return res.json({
+          message: 'Tarefas listadas com sucesso',
+          tarefas,
+        });
+      } catch (error) {
+        next(error);
       }
-
-      return res.json({
-        message: 'Tarefa deletada com sucesso',
-        tarefa,
-      });
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
-
-  public async listAll(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-    try {
-      const tarefas = await TarefaRepository.findAll();
-
-      return res.json({
-        message: 'Tarefas listadas com sucesso',
-        tarefas,
-      });
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de tratamento de erro
-    }
-  }
-}

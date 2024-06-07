@@ -14,9 +14,8 @@ export const Tarefa = z.object({
       invalid_type_error: 'O nome deve ser uma string',
       required_error: 'O nome é obrigatório',
     })
-    .min(5, { message: 'O nome deve ter pelo menos 5 caracteres' })
-    .max(50, { message: 'O nome deve ter no máximo 50 caracteres' }),
-
+    .min(5, { message: 'O nome deve ter pelo menos 5 caracteres' }),
+ 
   descricao: z
     .string({
       message: 'Essa descrição deve ter no máximo 140 caracteres',
@@ -25,7 +24,7 @@ export const Tarefa = z.object({
   finalizada: z.boolean().default(false),
 
   data_termino: z.date().optional()
-  .transform((value) => (value ? formatDate(value) : undefined))
+  .transform((value) => (value ? formatDate(value) : ''))
    .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
       message: 'A data deve estar no formato 0000-00-00',
     }),
@@ -37,3 +36,4 @@ export const Tarefa = z.object({
 
 
 export const UpdateTarefa = Tarefa.partial();
+
