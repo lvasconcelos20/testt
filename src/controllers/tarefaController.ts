@@ -25,6 +25,25 @@ export class TarefaController {
     }
   }
 
+  public async read(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
+
+      // Verifica se existe a tarefa
+      const tarefa = await TarefaRepository.findById(Number(id));
+      if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+      }
+
+      return res.json({
+        message: 'Tarefa encontrada com sucesso',
+        tarefa,
+      });
+    } catch (error) {
+      next(error); // Passa o erro para o middleware de tratamento de erro
+    }
+  }
+
   public async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
@@ -44,7 +63,7 @@ export class TarefaController {
         tarefa: updatedTarefa,
       });
     } catch (error) {
-      next(error); // Passa o erro para o próximo middleware de tratamento de erro
+      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
 
@@ -69,7 +88,7 @@ export class TarefaController {
         tarefa: updatedTarefa,
       });
     } catch (error) {
-      next(error); // Passa o erro para o próximo middleware de tratamento de erro
+      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
 
@@ -86,7 +105,7 @@ export class TarefaController {
         tarefa,
       });
     } catch (error) {
-      next(error); // Passa o erro para o próximo middleware de tratamento de erro
+      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
 
@@ -99,8 +118,7 @@ export class TarefaController {
         tarefas,
       });
     } catch (error) {
-      next(error); // Passa o erro para o próximo middleware de tratamento de erro
+      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
 }
-

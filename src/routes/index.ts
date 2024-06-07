@@ -1,3 +1,4 @@
 import  memberRouter  from "./MemberRouter"
+import tarefaRouter from "./TarefaRouter"
 
-export { memberRouter}
+export { memberRouter, tarefaRouter}
