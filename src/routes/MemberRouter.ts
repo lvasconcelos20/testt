@@ -9,19 +9,9 @@ memberRouter.route('/')
      MemberController.create,
   );
 
-memberRouter.route('/:userId')
-  .get(
-     MemberController.read,
-  );
-
-memberRouter.route('/:userId')
-  .patch(
-     MemberController.update,
-  );
-
-memberRouter.route('/:userId')
-  .delete(
-     MemberController.delete,
-  );
-
+  memberRouter.route('/:memberId')
+  .get(MemberController.read)
+  .patch(MemberController.update)
+  .delete(MemberController.delete);
+  
 export default memberRouter;  

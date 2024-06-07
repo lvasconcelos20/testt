@@ -10,15 +10,15 @@ class MemberController {
       const existingMember = await MemberRepository.findByEmail(memberData.email);
 
       if (existingMember) {
-        return next({
-          status: 400,
-          message: 'Este e-mail já está registrado, tente novamente',
+        return res.status(400).json({
+          message: 'Este e-mail já está registrado',
         });
       }
-       
-      return next();
+
+      const newMember = await MemberRepository.create(memberData);
+      res.status(201).json(newMember);
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
@@ -26,7 +26,7 @@ class MemberController {
     try {
       const { memberId } = req.params;
 
-      const member = await MemberRepository.findById(memberId);
+      const member = await MemberRepository.findById(Number(memberId));
 
       if (!member) {
         return next({
@@ -35,14 +35,9 @@ class MemberController {
         });
       }
 
-      res.locals = {
-        status: 200,
-        data: member,
-      };
-
-      return next();
+      res.status(200).json(member);
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
@@ -51,17 +46,14 @@ class MemberController {
       const { memberId } = req.params;
       const memberData = UpdateMember.parse(req.body);
 
-      const updatedMember = await MemberRepository.update(memberId, memberData);
+      const updatedMember = await MemberRepository.update(Number(memberId), memberData);
 
-      res.locals = {
-        status: 200,
-        data: updatedMember,
+      res.status(200).json({
         message: 'Membro atualizado',
-      };
-
-      return next();
+        data: updatedMember,
+      });
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
@@ -69,18 +61,15 @@ class MemberController {
     try {
       const { memberId } = req.params;
 
-      await MemberRepository.delete(memberId);
+      await MemberRepository.delete(Number(memberId));
 
-      res.locals = {
-        status: 200,
+      res.status(200).json({
         message: 'Membro deletado',
-      };
-
-      return next();
+      });
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 }
 
-export default new  MemberController();
+export default new MemberController();

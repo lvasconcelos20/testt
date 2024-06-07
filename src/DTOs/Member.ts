@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
 export const Member = z.object({
+  id: z 
+  .string ({
+
+  }),
   name: z
   .string({
     invalid_type_error: 'O nome deve ser uma string',
