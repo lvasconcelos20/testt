@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import prisma from '../database';
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 
 export const Tarefa = z.object({
   name: z
@@ -10,38 +17,22 @@ export const Tarefa = z.object({
     .min(5, { message: 'O nome deve ter pelo menos 5 caracteres' })
     .max(50, { message: 'O nome deve ter no máximo 50 caracteres' }),
 
-  descrição: z
+  descricao: z
     .string({
       message: 'Essa descrição deve ter no máximo 140 caracteres',
     }),
 
   finalizada: z.boolean().default(false),
 
-  data_termino: z.date({
-    invalid_type_error: "A data de início deve ser um objeto de data válida",
-    required_error: "A data de início é obrigatória",
-  }),
+  data_termino: z.date().optional()
+  .transform((value) => (value ? formatDate(value) : undefined))
+   .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+      message: 'A data deve estar no formato 0000-00-00',
+    }),
   prioridade: z.enum(['baixa', 'media', 'alta']).default('baixa'), 
 });
 
-export const finalizarTarefa = async (tarefaId: number) => {
-    try {
-      // Atualiza a tarefa como finalizada e registra a data e hora de conclusão
-      const tarefaAtualizada = await prisma.tarefa.update({
-        where: { id: tarefaId },
-        data: {
-          finalizada: true,
-          data_termino: new Date(), // Registra a data e hora atual
-        },
-      });
-  
-      console.log("Tarefa finalizada e persistida no banco de dados:", tarefaAtualizada);
-  
-    } catch (error) {
-      console.error("Erro ao finalizar tarefa:", error);
-   
-    }
-  };
+
 
 
 

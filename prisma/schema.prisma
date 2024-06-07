@@ -28,7 +28,7 @@ model Tarefa {
   name String
   decricao String @db.VarChar(140)
   finalizada Boolean @default(false)
-  data_termino DateTime
+  data_termino String   
   prioridade  Prioridade 
 }
 
