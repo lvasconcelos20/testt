@@ -1,12 +1,11 @@
-// TarefaController.ts
 import { Request, Response, NextFunction } from 'express';
-import TarefaRepository from '../repository/TarefaRepository';
-import { Tarefa } from '@prisma/client';
+import TarefaRepository from '../repository/TarefaRepository'; // Importa o repositório
+import { Prisma, Tarefa } from '@prisma/client'; // Importa Prisma para manipular tipos
 
 export class TarefaController {
-  public async create(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  public async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const tarefaData: Tarefa = req.body;
+      const tarefaData: Prisma.TarefaCreateInput = req.body;
 
       // Verifica se já existe uma tarefa com o mesmo nome
       const existingTarefa = await TarefaRepository.findByName(tarefaData.name);
@@ -22,14 +21,14 @@ export class TarefaController {
         tarefa: newTarefa,
       });
     } catch (error) {
-      return next(error);
+      next(error); // Passa o erro para o middleware de tratamento de erro
     }
   }
 
-  public async update(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  public async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-      const tarefaData: Tarefa = req.body;
+      const tarefaData: Prisma.TarefaUpdateInput = req.body;
 
       // Verifica se existe a tarefa
       const existingTarefa = await TarefaRepository.findById(Number(id));
@@ -45,11 +44,11 @@ export class TarefaController {
         tarefa: updatedTarefa,
       });
     } catch (error) {
-      return next(error); // Passa o erro para o middleware de tratamento de erros
+      next(error); // Passa o erro para o próximo middleware de tratamento de erro
     }
   }
 
-  public async finalize(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  public async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
 
@@ -60,18 +59,21 @@ export class TarefaController {
       }
 
       // Atualiza a tarefa com finalização
-      const updatedTarefa = await TarefaRepository.finalize(Number(id));
+      const updatedTarefa = await TarefaRepository.update(Number(id), {
+        finalizada: true,
+        data_termino: new Date().toISOString(),
+      });
 
       return res.json({
         message: 'Tarefa finalizada com sucesso',
         tarefa: updatedTarefa,
       });
     } catch (error) {
-      return next(error); // Passa o erro para o middleware de tratamento de erros
+      next(error); // Passa o erro para o próximo middleware de tratamento de erro
     }
   }
 
-  public async delete(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  public async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
       const tarefa = await TarefaRepository.delete(Number(id));
@@ -84,11 +86,11 @@ export class TarefaController {
         tarefa,
       });
     } catch (error) {
-      return next(error); // Passa o erro para o middleware de tratamento de erros
+      next(error); // Passa o erro para o próximo middleware de tratamento de erro
     }
   }
 
-  public async listAll(req: Request, res: Response, next: NextFunction): Promise<Response> {
+  public async listAll(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const tarefas = await TarefaRepository.findAll();
 
@@ -97,24 +99,8 @@ export class TarefaController {
         tarefas,
       });
     } catch (error) {
-      return next(error); // Passa o erro para o middleware de tratamento de erros
-    }
-  }
-
-  public async getById(req: Request, res: Response, next: NextFunction): Promise<Response> {
-    try {
-      const { id } = req.params; // Supondo que o ID da tarefa é passado na URL como parâmetro
-      const tarefa = await TarefaRepository.findById(Number(id));
-      if (!tarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
-      }
-
-      return res.json({
-        message: 'Tarefa encontrada com sucesso',
-        tarefa,
-      });
-    } catch (error) {
-      return next(error); // Passa o erro para o middleware de tratamento de erros
+      next(error); // Passa o erro para o próximo middleware de tratamento de erro
     }
   }
 }
+
