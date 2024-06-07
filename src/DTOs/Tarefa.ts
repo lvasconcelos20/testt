@@ -21,7 +21,7 @@ export const Tarefa = z.object({
     invalid_type_error: "A data de início deve ser um objeto de data válida",
     required_error: "A data de início é obrigatória",
   }),
-  prioridade: z.enum(['baixa', 'media', 'alta']).default('baixa'), // Campo para prioridade com valor padrão 'baixa'
+  prioridade: z.enum(['baixa', 'media', 'alta']).default('baixa'), 
 });
 
 export const finalizarTarefa = async (tarefaId: number) => {
@@ -42,3 +42,7 @@ export const finalizarTarefa = async (tarefaId: number) => {
    
     }
   };
+
+
+
+export const UpdateTarefa = Tarefa.partial();
