@@ -26,6 +26,13 @@ class MemberRepository {
   async findAll(): Promise<Member[]> {
     return await prisma.member.findMany();
   }
+
+  async getMemberById(id: number) {
+    return await prisma.member.findUnique({
+      where: { id },
+    });
+  }
+
 }
 
 export default new MemberRepository();

@@ -2,9 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { TarefaRepository } from '../repository'; // Importa o repositório
 import { UpdateTarefa, Tarefa} from '../DTOs';
 
-
-
-  
+ 
   export class TarefaController {
     async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
       try {
@@ -50,10 +48,78 @@ import { UpdateTarefa, Tarefa} from '../DTOs';
       }
 
       res.status(200).json(member);
+
     } catch (error) {
       next(error);
     }
   }
+
+
+  async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params;
+      const numericId = Number(id);
+
+      if (isNaN(numericId)) {
+        return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+      }
+
+      const existingTarefa = await TarefaRepository.findTarefaById(numericId);
+      if (!existingTarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+      }
+
+      const updatedTarefa = await TarefaRepository.update(numericId, {
+        finalizada: true,
+        data_termino: new Date().toISOString(),
+      });
+
+      return res.json({
+        message: 'Tarefa finalizada com sucesso',
+        tarefa: updatedTarefa,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params;
+      const numericId = Number(id);
+
+      if (isNaN(numericId)) {
+        return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+      }
+
+      const tarefa = await TarefaRepository.delete(numericId);
+      if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+      }
+
+      return res.json({
+        message: 'Tarefa deletada com sucesso',
+        tarefa,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async listAll(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const tarefas = await TarefaRepository.findAll();
+
+      return res.json({
+        message: 'Tarefas listadas com sucesso',
+        tarefas,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
     async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
       try {
         const { id } = req.params;
@@ -144,3 +210,4 @@ import { UpdateTarefa, Tarefa} from '../DTOs';
       }
     }
   }
+
