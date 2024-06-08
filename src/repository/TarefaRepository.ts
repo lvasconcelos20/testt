@@ -28,6 +28,7 @@ class TarefaRepository {
   async findTarefaById(id: number): Promise<Tarefa | null> {
     return await prisma.tarefa.findUnique({
       where: { id },
+      include: { membro: true}, //incluir o membro
     });
   }
 
@@ -62,16 +63,20 @@ class TarefaRepository {
   async findTarefaByName(name: string): Promise<Tarefa | null> {
     return await prisma.tarefa.findFirst({
       where: { name },
+      include: { membro: true}
     });
   }
 
   async findAll(): Promise<Tarefa[]> {
-    return await prisma.tarefa.findMany();
+    return await prisma.tarefa.findMany({
+      include: {membro: true}
+    })
   }
 
   async getTarefasByMemberEmail(membroEmail: string): Promise<Tarefa[]> {
     return await prisma.tarefa.findMany({
       where: { membroEmail },
+      include: { membro: true}
     });
   }
 }

@@ -58,7 +58,19 @@ export class TarefaController {
   }
   async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
+      const { id } = req.params;
+      const numericId = Number(id);
+
+      if (isNaN(numericId)) {
+        return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+      }
+
       const tarefaData = UpdateTarefa.parse(req.body);
+
+      if (!tarefaData.name || !tarefaData.descricao || !tarefaData.prioridade || !tarefaData.membroEmail) {
+        return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
+      }
+
       const existingTarefa = await TarefaRepository.findTarefaByName(tarefaData.name);
 
       if (existingTarefa) {
@@ -73,11 +85,10 @@ export class TarefaController {
         }
       }
 
-      const updatedTarefa = await TarefaRepository.updateTarefa(numericId, tarefaData);
+      const updatedTarefa = await TarefaRepository.update(numericId,  tarefaData as Required<typeof tarefaData>);
 
-
-      res.status(201).json({
-        message: 'Tarefa criada com sucesso',
+      res.status(200).json({
+        message: 'Tarefa atualizada com sucesso',
         tarefa: updatedTarefa,
       });
     } catch (error) {
@@ -97,16 +108,14 @@ export class TarefaController {
       if (!existingTarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
       }
-
       const updatedTarefa = await TarefaRepository.update(numericId, {
         finalizada: true,
         data_termino: new Date().toISOString(),
-        name: '',
-        descricao: '',
-        prioridade: 'baixa',
-        membroEmail: ''
+        name: existingTarefa.name ?? '',
+        descricao: existingTarefa.descricao ?? '',
+        prioridade: existingTarefa.prioridade,
+        membroEmail: existingTarefa.membroEmail ?? ''
       });
-
       return res.json({
         message: 'Tarefa finalizada com sucesso',
         tarefa: updatedTarefa,
