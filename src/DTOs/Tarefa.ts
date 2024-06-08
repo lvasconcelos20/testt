@@ -19,7 +19,7 @@ export const Tarefa = z.object({
   descricao: z
     .string({
       message: 'Essa descrição deve ter no máximo 140 caracteres',
-    }),
+    }).optional(),
 
   finalizada: z.boolean().default(false),
 
@@ -29,6 +29,7 @@ export const Tarefa = z.object({
       message: 'A data deve estar no formato 0000-00-00',
     }),
   prioridade: z.enum(['baixa', 'media', 'alta']).default('baixa'), 
+  membroEmail: z.string().email({ message: 'Email inválido' }),
 });
 
 
@@ -37,3 +38,6 @@ export const Tarefa = z.object({
 
 export const UpdateTarefa = Tarefa.partial();
 
+
+
+export type TarefaCreateInput = z.infer<typeof Tarefa>;
