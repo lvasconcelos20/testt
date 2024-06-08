@@ -24,18 +24,20 @@ model Member {
   id       Int    @id @default(autoincrement())
   email    String @unique
   name     String
+  tarefas  Tarefa[]
 
 }
 
 
 model Tarefa {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())  
   name String @db.VarChar(50)
-  descricao String @db.VarChar(140)
+  descricao String? @db.VarChar(140)
   finalizada Boolean @default(false)
   data_termino String   
   prioridade  Prioridade 
+  membroEmail  String
+  membro   Member @relation(fields: [membroEmail], references: [email])
 
 }
 
-}

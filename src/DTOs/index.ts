@@ -1,4 +1,4 @@
 import { Member, UpdateMember } from "./Member";
-import { Tarefa, UpdateTarefa } from "./Tarefa";
+import { Tarefa, UpdateTarefa, TarefaCreateInput } from "./Tarefa";
 
-export { Member, UpdateMember, Tarefa, UpdateTarefa}
+export { Member, UpdateMember, Tarefa, UpdateTarefa, TarefaCreateInput}
