@@ -1,7 +1,13 @@
-function  Home() {
-    return <div>
-        <h1>TdsdsdEst</h1>
-    </div>
+
+import CadastroTarefa from "./cadastroTarefas"; 
+
+function Home() {
+    return (
+        <div>
+         
+            <CadastroTarefa /> 
+        </div>
+    );
 }
 
-export default Home
+export default Home; 
