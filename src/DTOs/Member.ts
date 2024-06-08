@@ -20,3 +20,4 @@ export const Member = z.object({
 });
 
 export const UpdateMember = Member.partial();
+
