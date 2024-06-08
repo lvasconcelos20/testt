@@ -1,107 +1,83 @@
-import { Prisma, Tarefa } from '@prisma/client';
+import { Tarefa } from '@prisma/client';
 import prisma from '../database';
-
+import { TarefaCreateInput } from '../DTOs';
 
 class TarefaRepository {
-
-  async create(data: Prisma.TarefaCreateInput): Promise<Tarefa> {
-    if (data.finalizada && typeof data.data_termino === 'string') {
-      data.data_termino = new Date(data.data_termino).toISOString();
-    } else if (data.finalizada && !data.data_termino) {
-      throw new Error('Data de término é obrigatória para tarefas finalizadas');
+  async create(data: TarefaCreateInput): Promise<Tarefa> {
+    if (data.finalizada && !data.data_termino) {
+        throw new Error('Data de término é obrigatória para tarefas finalizadas');
     }
 
-
     return await prisma.tarefa.create({
-      data: {
-        name: data.name,
-        descricao: data.descricao,
-        finalizada: data.finalizada,
-        data_termino: data.data_termino,
-        prioridade: data.prioridade,
-        membroId: memberid,
-      },
+        data: {
+            name: data.name,
+            descricao: data.descricao,
+            finalizada: data.finalizada,
+            data_termino: data.data_termino,
+            prioridade: data.prioridade,
+            membro: {
+                connect: {
+                    email: data.membroEmail, // Utiliza o campo membroEmail
+                },
+            },
+        },
     });
-  }
 
-
-    return await prisma.tarefa.create({ data });
   }
 
   async findTarefaById(id: number): Promise<Tarefa | null> {
     return await prisma.tarefa.findUnique({
       where: { id },
+      include: { membro: true}, //incluir o membro
     });
   }
 
-
-  async update(id: number, data: Prisma.TarefaUpdateInput): Promise<Tarefa> {
-    if (data.finalizada && typeof data.data_termino === 'string') {
-      data.data_termino = new Date(data.data_termino).toISOString();
-    } else if (data.finalizada && !data.data_termino) {
-      throw new Error('Data de término é obrigatória para tarefas finalizadas');
+  async update(id: number, data: TarefaCreateInput): Promise<Tarefa> {
+    if (data.finalizada && !data.data_termino) {
+        throw new Error('Data de término é obrigatória para tarefas finalizadas');
     }
 
-
     return await prisma.tarefa.update({
-      where: { id },
-      data: {
-        name: data.name,
-        descricao: data.descricao,
-        finalizada: data.finalizada,
-        data_termino: data.data_termino,
-        prioridade: data.prioridade,
-        membro: {
-          connect: { id: data.membro }, // Ajustando para conectar o membro corretamente
+        where: { id },
+        data: {
+            name: data.name,
+            descricao: data.descricao,
+            finalizada: data.finalizada,
+            data_termino: data.data_termino,
+            prioridade: data.prioridade,
+            membro: {
+                connect: {
+                    email: data.membroEmail, // Utiliza o campo membroEmail
+                },
+            },
         },
-      },
     });
   }
 
   async delete(id: number): Promise<Tarefa> {
     return await prisma.tarefa.delete({
       where: { id },
-
-    return await prisma.tarefa.update({ where: { id }, data });
-  }
-
-
-  // Deleta uma tarefa pelo ID
-  async delete(id: number): Promise<Tarefa> {
-    return await prisma.tarefa.delete({
-      where: { id }
-
     });
   }
 
   async findTarefaByName(name: string): Promise<Tarefa | null> {
-
     return await prisma.tarefa.findFirst({
       where: { name },
+      include: { membro: true}
     });
   }
 
   async findAll(): Promise<Tarefa[]> {
-    return await prisma.tarefa.findMany();
-  }
-
-  async getTarefasByMemberId(membroId: number): Promise<Tarefa[]> {
     return await prisma.tarefa.findMany({
-      where: { membroId: membroId },
+      include: {membro: true}
+    })
+  }
+
+  async getTarefasByMemberEmail(membroEmail: string): Promise<Tarefa[]> {
+    return await prisma.tarefa.findMany({
+      where: { membroEmail },
+      include: { membro: true}
     });
-  }
-}
-
-    const tarefa = await prisma.tarefa.findFirst({ where: { name } });
-    return tarefa;
-  }
-
-  async findAll(): Promise<Tarefa[]> {
-    const tarefas = await prisma.tarefa.findMany();
-    return tarefas.map(tarefa => ({
-      ...tarefa,
-      data_termino: tarefa.data_termino ? new Date(tarefa.data_termino).toISOString() : null,
-    })) as Tarefa[];
   }
 }
 
