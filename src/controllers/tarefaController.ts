@@ -65,27 +65,24 @@ export class TarefaController {
         return res.status(400).json({ message: 'ID fornecido não é um número válido' });
       }
 
+      // Obtem o objeto de tarefa existente
+      const existingTarefa = await TarefaRepository.findTarefaById(numericId);
+      if (!existingTarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+      }
+
+      // Verifica se a tarefa é finalizada
+      if (existingTarefa.finalizada) {
+        return res.status(403).json({ message: 'Tarefas finalizadas não podem ser editadas' });
+      }
+
       const tarefaData = UpdateTarefa.parse(req.body);
 
       if (!tarefaData.name || !tarefaData.descricao || !tarefaData.prioridade || !tarefaData.membroEmail) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
       }
 
-      const existingTarefa = await TarefaRepository.findTarefaByName(tarefaData.name);
-
-      if (existingTarefa) {
-        return res.status(400).json({ message: 'Uma tarefa com este nome já existe' });
-      }
-
-      if (tarefaData.finalizada) {
-        if (tarefaData.data_termino) {
-          tarefaData.data_termino = new Date(tarefaData.data_termino).toISOString();
-        } else {
-          return res.status(400).json({ message: 'Data de término é obrigatória para tarefas finalizadas' });
-        }
-      }
-
-      const updatedTarefa = await TarefaRepository.update(numericId,  tarefaData as Required<typeof tarefaData>);
+      const updatedTarefa = await TarefaRepository.update(numericId, tarefaData as Required<typeof tarefaData>);
 
       res.status(200).json({
         message: 'Tarefa atualizada com sucesso',
