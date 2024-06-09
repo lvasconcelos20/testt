@@ -1,33 +1,28 @@
 // routes/tarefaRouter.ts
 import { Router, Request, Response, NextFunction } from 'express';
 import { TarefaController } from '../controllers';
-import { TarefaRepository } from '../repository';
 import { Tarefa } from '@prisma/client';
+import prisma from '../database';
 
 const tarefaRouter = Router();
 const tarefaController = new TarefaController();
 
-const middlewareConvertAndFindTarefaById = async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+export const middlewareFindByEmail = async (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.params;
+
   try {
-    const { id } = req.params;
-    const numericId = Number(id);
+      const membro = await prisma.member.findUnique({
+          where: { email }
+      });
 
-    if (isNaN(numericId)) {
-      return res.status(400).json({ message: 'ID fornecido não é um número válido' });
-    }
+      if (!membro) {
+          return res.status(404).json({ message: 'Membro não encontrado' });
+      }
 
-    // Encontra a tarefa pelo ID
-    const tarefa = await TarefaRepository.findTarefaById(numericId);
-    if (!tarefa) {
-      return res.status(404).json({ message: 'Tarefa não encontrada' });
-    }
-
-    // Adiciona a tarefa encontrada ao objeto de requisição
-    req.tarefa = tarefa;
-    next();
+      next();
   } catch (error) {
-    next(error);
-  }
+      next(error);
+  } 
 };
 
 // Roteamento das operações CRUD
@@ -40,22 +35,23 @@ tarefaRouter.route('/')
     }
   });
 
-tarefaRouter.route('/:id')
-  .get(middlewareConvertAndFindTarefaById, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+tarefaRouter.route('/:email')
+  .get(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
     try {
       res.status(200).json(req.tarefa);
     } catch (error) {
       next(error);
     }
   })
-  .patch(middlewareConvertAndFindTarefaById, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+  .patch(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
     try {
-      await tarefaController.update(req, res, next);
+      const updatedTarefa = await tarefaController.update(req, res, next);
+      res.status(200).json(updatedTarefa);
     } catch (error) {
       next(error);
     }
   })
-  .delete(middlewareConvertAndFindTarefaById, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+  .delete(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
     try {
       await tarefaController.delete(req, res, next);
     } catch (error) {

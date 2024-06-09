@@ -43,6 +43,7 @@ export const Tarefa = z.object({
 
 
 
+
 export const UpdateTarefa = Tarefa.partial();
 
 

@@ -8,11 +8,11 @@ import { memberRouter, tarefaRouter } from './routes';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000; // Porta configurada
+const PORT = process.env.PORT || 3002; // Porta configurada
 
 app.use(cors({
-  origin: 'http://localhost:3001', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: 'http://localhost:3000', 
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 })); 
 

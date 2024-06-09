@@ -1,11 +1,12 @@
 
 import CadastroTarefa from "./cadastroTarefas"; 
+import EdicaoTarefa from "./editTarefa";
 
 function App() {
     return (
         <div>
          
-            <CadastroTarefa /> 
+            <EdicaoTarefa/>
         </div>
     );
 }
