@@ -2,66 +2,105 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api'; // Importando Axios configurado
 import { Container, Form, Input, TextArea, Select, Button, Page } from './style';
 
-const EditarTarefa = ({ tarefaId, onDeleteSuccess }) => {
-  const [tarefa, setTarefa] = useState(null);
+const UpdateTarefa = () => {
+  const [name, setName] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [finalizada, setFinalizada] = useState(false);
+  const [dataTerminoStr, setDataTerminoStr] = useState('');
+  const [prioridade, setPrioridade] = useState('baixa');
+  const [membroEmail, setMembroEmail] = useState('');
+  const [tarefaData, setTarefaData] = useState(null);
   const [errors, setErrors] = useState({});
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Carregar dados da tarefa para edição
-    const fetchTarefa = async () => {
-      try {
-        const response = await api.get(`/tarefa/${tarefaId}`);
-        setTarefa(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar a tarefa:', error);
-        alert('Erro ao carregar a tarefa. Por favor, tente novamente.');
-      }
-    };
+    if (tarefaData) {
+      setName(tarefaData.name);
+      setDescricao(tarefaData.descricao);
+      setFinalizada(tarefaData.finalizada);
+      setDataTerminoStr(tarefaData.data_termino || '');
+      setPrioridade(tarefaData.prioridade);
+    }
+  }, [tarefaData]);
 
-    fetchTarefa();
-  }, [tarefaId]);
-
-  if (!tarefa) return <p>Carregando...</p>; // Opção de renderizar algo enquanto carrega
-
-  const handleUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validação dos campos obrigatórios
+    if (!name || !descricao || !membroEmail || !prioridade) {
+      setErrors({ geral: 'Todos os campos obrigatórios devem ser preenchidos' });
+      return;
+    }
+
+    const dataTermino = dataTerminoStr ? dataTerminoStr.replace(/[^0-9]/g, '') : undefined;
+    const formattedDataTermino = dataTermino
+      ? `${dataTermino.slice(0, 4)}-${dataTermino.slice(4, 6)}-${dataTermino.slice(6)}`
+      : undefined;
+
     const tarefaAtualizada = {
-      name: tarefa.name,
-      descricao: tarefa.descricao,
-      prioridade: tarefa.prioridade,
-      membroEmail: tarefa.membroEmail,
+      name,
+      descricao,
+      finalizada,
+      data_termino: formattedDataTermino,
+      prioridade,
+      membroEmail,
     };
 
     try {
-      const response = await api.put(`/tarefa/${tarefaId}`, tarefaAtualizada);
+      const response = await api.patch(`/tarefa/${membroEmail}`, tarefaAtualizada);
 
       if (response.status === 200) {
         alert('Tarefa atualizada com sucesso!');
+        setTarefaData(null);
+        setName('');
+        setDescricao('');
+        setFinalizada(false);
+        setDataTerminoStr('');
+        setPrioridade('baixa');
+        setMembroEmail('');
+        setErrors({});
+        setError('');
       }
     } catch (error) {
       console.error('Erro ao atualizar a tarefa:', error);
+
       let errorMessage = 'Erro ao atualizar a tarefa. Por favor, tente novamente.';
 
-      if (error.response && error.response.status === 400) {
-        errorMessage = 'Os dados enviados para o servidor são inválidos. Verifique os campos e tente novamente.';
-      } else if (error.response && error.response.status === 500) {
-        errorMessage = 'Ocorreu um erro interno no servidor. Por favor, tente novamente mais tarde.';
-      } else if (!error.response) {
-        errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
+      if (error.response) {
+        if (error.response.status === 400) {
+          if (error.response.data.message.includes('Nome já existe')) {
+            errorMessage = 'Uma tarefa com este nome já existe';
+          } else if (error.response.data.message.includes('Data de término é obrigatória para tarefas finalizadas')) {  
+            errorMessage = 'Data de término é obrigatória para tarefas finalizadas';
+          } else if (error.response.data.message.includes('Membro não cadastrado no sistema')) {
+            errorMessage = 'Membro não cadastrado no sistema';
+          }
+        } else if (error.response.status === 404) {
+          errorMessage = 'Membro não encontrado. Tente Novamente.';
+        } else if (error.response.status === 403) {
+          errorMessage = 'Tarefas finalizadas não podem ser editadas';
+        }
       }
 
-      alert(errorMessage);
+      setError(errorMessage);
     }
   };
 
   const handleDelete = async () => {
     try {
-      const response = await api.delete(`/tarefa/${tarefaId}`);
+      const response = await api.delete(`/tarefa/${membroEmail}`);
 
       if (response.status === 200) {
         alert('Tarefa deletada com sucesso!');
-        onDeleteSuccess(); // Atualize a lista ou redirecione após excluir
+        setTarefaData(null);
+        setName('');
+        setDescricao('');
+        setFinalizada(false);
+        setDataTerminoStr('');
+        setPrioridade('baixa');
+        setMembroEmail('');
+        setErrors({});
+        setError('');
       }
     } catch (error) {
       console.error('Erro ao deletar a tarefa:', error);
@@ -69,7 +108,7 @@ const EditarTarefa = ({ tarefaId, onDeleteSuccess }) => {
       let errorMessage = 'Erro ao deletar a tarefa. Por favor, tente novamente.';
 
       if (error.response && error.response.status === 404) {
-        errorMessage = 'Tarefa não encontrada.';
+        errorMessage = 'Membro não encontrado. Tente Novamente.';
       } else if (!error.response) {
         errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
       }
@@ -82,24 +121,21 @@ const EditarTarefa = ({ tarefaId, onDeleteSuccess }) => {
     <Page>
       <Container>
         <h2>Edição de Tarefa</h2>
-        <Form onSubmit={handleUpdate}>
+        <Form onSubmit={handleSubmit}>
           <Input
             type="text"
             placeholder="Nome da Tarefa"
-            value={tarefa.name}
-            onChange={(e) => setTarefa({ ...tarefa, name: e.target.value })}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
           {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}
           <TextArea
             placeholder="Descrição"
-            value={tarefa.descricao}
-            onChange={(e) => setTarefa({ ...tarefa, descricao: e.target.value })}
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
           />
           {errors.descricao && <p style={{ color: 'red' }}>{errors.descricao}</p>}
-          <Select
-            value={tarefa.prioridade}
-            onChange={(e) => setTarefa({ ...tarefa, prioridade: e.target.value })}
-          >
+          <Select value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
             <option value="baixa">Baixa</option>
             <option value="media">Média</option>
             <option value="alta">Alta</option>
@@ -107,18 +143,35 @@ const EditarTarefa = ({ tarefaId, onDeleteSuccess }) => {
           <Input
             type="email"
             placeholder="Email do Membro"
-            value={tarefa.membroEmail}
-            onChange={(e) => setTarefa({ ...tarefa, membroEmail: e.target.value })}
+            value={membroEmail}
+            onChange={(e) => setMembroEmail(e.target.value)}
           />
           {errors.membroEmail && <p style={{ color: 'red' }}>{errors.membroEmail}</p>}
+          <Input
+            type="date"
+            placeholder="Data de Término"
+            value={dataTerminoStr}
+            onChange={(e) => setDataTerminoStr(e.target.value)}
+          />
+          {errors.data_termino && <p style={{ color: 'red' }}>{errors.data_termino}</p>}
+          <div>
+            <input
+              type="checkbox"
+              checked={finalizada}
+              onChange={(e) => setFinalizada(e.target.checked)}
+            />
+            <label>Finalizada</label>
+          </div>
+          {errors.finalizada && <p style={{ color: 'red' }}>{errors.finalizada}</p>}
           <Button type="submit">Atualizar</Button>
-          <Button onClick={handleDelete} style={{ backgroundColor: 'red' }}>
+          <Button type="button" onClick={handleDelete} style={{ backgroundColor: 'red' }}>
             Deletar
           </Button>
         </Form>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </Container>
     </Page>
   );
 };
 
-export default EditarTarefa;
+export default UpdateTarefa;

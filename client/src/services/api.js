@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // Substitua pelo seu URL base do backend
+  baseURL: 'http://localhost:3002', // Substitua pelo seu URL base do backend
 });
 
 export default api;

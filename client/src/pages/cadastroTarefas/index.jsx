@@ -1,39 +1,37 @@
 import React, { useState } from 'react';
-import api from '../../services/api'; // Importando Axios configurado
+import api from '../../services/api';
 import { Container, Form, Input, TextArea, Select, Button, BoxFinish, Page } from './style';
 
 const CadastroTarefa = () => {
     const [name, setName] = useState('');
     const [descricao, setDescricao] = useState('');
-    const [finalizada, setFinalizada] = useState('n'); // Como string inicial
+    const [finalizada, setFinalizada] = useState('n'); 
     const [dataTerminoStr, setDataTerminoStr] = useState('');
     const [prioridade, setPrioridade] = useState('baixa');
     const [membroEmail, setMembroEmail] = useState('');
-    const [error, setError] = useState(''); // Estado para armazenar mensagens de erro
+    const [error, setError] = useState(''); 
     const [errors, setErrors] = useState({});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Converta a data para o formato "YYYY-MM-DD" antes de enviar
         const dataTermino = dataTerminoStr ? dataTerminoStr.replace(/[^0-9]/g, '') : undefined;
         const formattedDataTermino = dataTermino ? dataTermino.slice(0, 4) + '-' + dataTermino.slice(4, 6) + '-' + dataTermino.slice(6) : undefined;
 
-        // Converta o valor finalizada para booleano antes de enviar
+    
         const finalizadaBool = finalizada === 's';
 
         const tarefa = {
             name,
             descricao,
-            finalizada: finalizadaBool, // Converte diretamente aqui
+            finalizada: finalizadaBool, 
             data_termino: formattedDataTermino,
             prioridade,
             membroEmail,
         };
 
         try {
-            const response = await api.post('/tarefa', tarefa); // Envia os dados para o backend
-
+            const response = await api.post('/tarefa', tarefa); 
             if (response.status === 201) {
                 alert('Tarefa cadastrada com sucesso!');
                 setName('');
@@ -43,7 +41,7 @@ const CadastroTarefa = () => {
                 setPrioridade('baixa');
                 setMembroEmail('');
                 setErrors({});
-                setError(''); // Limpa mensagem de erro após sucesso
+                setError(''); 
             }
         } catch (error) {
             console.error('Erro ao cadastrar a tarefa:', error);

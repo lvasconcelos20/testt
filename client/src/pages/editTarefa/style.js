@@ -90,9 +90,9 @@ export const Button = styled.button`
 
 export const BoxFinish = styled.div`
   display: flex;
-  align-items: center; // Mantém os elementos na mesma linha
-  gap: 10px; // Espaço entre os elementos
+  align-items: center; 
+  gap: 10px; 
   margin-bottom: 10px;
-  margin-left: 10vw;
-  margin-top: 10px// Espaço inferior para o container
+  margin-left: 20vw;
+  margin-top: 10px
 `
