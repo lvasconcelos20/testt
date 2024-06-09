@@ -1,117 +1,128 @@
-import React, { useState } from "react";
-import { Container, Form, Input, TextArea, Select, Button, Page } from "./style";
-
+import React, { useState } from 'react';
+import api from '../../services/api'; // Importando Axios configurado
+import { Container, Form, Input, TextArea, Select, Button, BoxFinish, Page } from './style';
 
 const CadastroTarefa = () => {
-  const [name, setName] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [finalizada, setFinalizada] = useState(false);
-  const [dataTermino, setDataTermino] = useState("");
-  const [prioridade, setPrioridade] = useState("BAIXA");
-  const [membroEmail, setMembroEmail] = useState("");
-  const [errors, setErrors] = useState({});
+    const [name, setName] = useState('');
+    const [descricao, setDescricao] = useState('');
+    const [finalizada, setFinalizada] = useState('n'); // Como string inicial
+    const [dataTerminoStr, setDataTerminoStr] = useState('');
+    const [prioridade, setPrioridade] = useState('baixa');
+    const [membroEmail, setMembroEmail] = useState('');
+    const [error, setError] = useState(''); // Estado para armazenar mensagens de erro
+    const [errors, setErrors] = useState({});
 
-  const validateForm = () => {
-    const errors = {};
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    if (!name.trim()) {
-      errors.name = "O nome da tarefa é obrigatório.";
-    }
+        // Converta a data para o formato "YYYY-MM-DD" antes de enviar
+        const dataTermino = dataTerminoStr ? dataTerminoStr.replace(/[^0-9]/g, '') : undefined;
+        const formattedDataTermino = dataTermino ? dataTermino.slice(0, 4) + '-' + dataTermino.slice(4, 6) + '-' + dataTermino.slice(6) : undefined;
 
-    if (!descricao.trim()) {
-      errors.descricao = "A descrição é obrigatária ";
-    }
+        // Converta o valor finalizada para booleano antes de enviar
+        const finalizadaBool = finalizada === 's';
 
-    if (!dataTermino) {
-      errors.dataTermino = "A data de término é obrigatória após finalizar a tarefa.";
-    }
+        const tarefa = {
+            name,
+            descricao,
+            finalizada: finalizadaBool, // Converte diretamente aqui
+            data_termino: formattedDataTermino,
+            prioridade,
+            membroEmail,
+        };
 
-    if (!membroEmail.trim() || !/\S+@\S+\.\S+/.test(membroEmail)) {
-      errors.membroEmail = "Este email é inválido.";
-    }
+        try {
+            const response = await api.post('/tarefa', tarefa); // Envia os dados para o backend
 
-    return errors;
-  };
+            if (response.status === 201) {
+                alert('Tarefa cadastrada com sucesso!');
+                setName('');
+                setDescricao('');
+                setFinalizada('n');
+                setDataTerminoStr('');
+                setPrioridade('baixa');
+                setMembroEmail('');
+                setErrors({});
+                setError(''); // Limpa mensagem de erro após sucesso
+            }
+        } catch (error) {
+            console.error('Erro ao cadastrar a tarefa:', error);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+            // Obtenha a mensagem de erro do backend
+            let errorMessage = 'Erro ao cadastrar a tarefa. Por favor, tente novamente.';
 
-    // Realiza a validação do formulário
-    const formErrors = validateForm();
+            if (error.response) {
+                if (error.response.status === 400) {
+                    if (error.response.data.message.includes('nome já existe')) {
+                        errorMessage = 'Uma tarefa com este nome já existe';
+                    } else if (error.response.data.message.includes('Data de término é obrigatória para tarefas finalizadas')) {
+                        errorMessage = 'Data de término é obrigatória para tarefas finalizadas';
+                    } else if (error.response.data.message.includes('Todos os campos obrigatórios devem ser preenchidos')) {
+                        errorMessage = 'Todos os campos obrigatórios devem ser preenchidos';
+                    } else if (error.response.data.message.includes('Membro não cadastrado no sistema')) {
+                        errorMessage = 'Membro não cadastrado no sistema';
+                    }
+                } else if (error.response.status === 404) {
+                    errorMessage = 'Tarefa não encontrada';
+                } else if (error.response.status === 403) {
+                    errorMessage = 'Tarefas finalizadas não podem ser editadas';
+                }
+            }
 
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors); // Exibe mensagens de erro para os campos inválidos
-      return; // Sai da função se houver erros
-    }
-
-    const tarefa = {
-      name,
-      descricao,
-      finalizada,
-      data_termino,
-      prioridade,
-      membroEmail,
+            setError(errorMessage);
+        }
     };
 
-    try {
-      const response = await api.post("/tarefas", tarefa);
-      console.log("Tarefa cadastrada com sucesso:", response.data);
-      alert("Tarefa cadastrada com sucesso!");
-      // Reseta os campos do formulário após o envio bem-sucedido
-      setName("");
-      setDescricao("");
-      setFinalizada(false);
-      setDataTermino("");
-      setPrioridade("BAIXA");
-      setMembroEmail("");
-      setErrors({}); // Limpa os erros após o envio bem-sucedido
-    } catch (error) {
-      console.error("Erro ao cadastrar a tarefa:", error);
-      alert("Erro ao cadastrar a tarefa. Por favor, tente novamente.");
-    }
-  };
-
-  return (
-    <Page>
-      <Container>
-        <h2>Cadastro de Tarefa</h2>
-        <Form onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            placeholder="Nome da Tarefa"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {errors.name && <p style={{ color: "red" }}>{errors.name}</p>}
-          <TextArea
-            placeholder="Descrição"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-          />
-          {errors.descricao && <p style={{ color: "red" }}>{errors.descricao}</p>}
-          <Input
-            type="date"
-            value={dataTermino}
-            onChange={(e) => setDataTermino(e.target.value)}
-          />
-          {errors.dataTermino && <p style={{ color: "red" }}>{errors.dataTermino}</p>}
-          <Select value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
-            <option value="BAIXA">Baixa</option>
-            <option value="MEDIA">Média</option>
-            <option value="ALTA">Alta</option>
-          </Select>
-          <Input
-            type="email"
-            placeholder="Email do Membro"
-            value={membroEmail}
-            onChange={(e) => setMembroEmail(e.target.value)}
-          />
-          {errors.membroEmail && <p style={{ color: "red" }}>{errors.membroEmail}</p>}
-          <Button type="submit">Cadastrar</Button>
-        </Form>
-      </Container>
-    </Page>
-  );
+    return (
+        <Page>
+            <Container>
+                <h2>Cadastro de Tarefa</h2>
+                <Form onSubmit={handleSubmit}>
+                    <Input
+                        type="text"
+                        placeholder="Nome da Tarefa"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}
+                    <TextArea
+                        placeholder="Descrição"
+                        value={descricao}
+                        onChange={(e) => setDescricao(e.target.value)}
+                    />
+                    {errors.descricao && <p style={{ color: 'red' }}>{errors.descricao}</p>}
+                    <Input
+                        type="date"
+                        value={dataTerminoStr}
+                        onChange={(e) => setDataTerminoStr(e.target.value)}
+                    />
+                    {errors.dataTermino && <p style={{ color: 'red' }}>{errors.dataTermino}</p>}
+                    <Select value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
+                        <option value="baixa">Baixa</option>
+                        <option value="media">Média</option>
+                        <option value="alta">Alta</option>
+                    </Select>
+                    <Input
+                        type="email"
+                        placeholder="Email do Membro"
+                        value={membroEmail}
+                        onChange={(e) => setMembroEmail(e.target.value)}
+                    />
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {errors.membroEmail && <p style={{ color: 'red' }}>{errors.membroEmail}</p>}
+                    <BoxFinish>
+                        <span>Finalizada</span>
+                        <Input
+                            type="checkbox"
+                            checked={finalizada === 's'} // Converte para booleano na verificação
+                            onChange={(e) => setFinalizada(e.target.checked ? 's' : 'n')}
+                        />
+                    </BoxFinish>
+                    <Button type="submit">Cadastrar</Button>
+                </Form>
+            </Container>
+        </Page>
+    );
 };
 
 export default CadastroTarefa;

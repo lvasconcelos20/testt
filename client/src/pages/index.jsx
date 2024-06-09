@@ -1,7 +1,7 @@
 
 import CadastroTarefa from "./cadastroTarefas"; 
 
-function Home() {
+function App() {
     return (
         <div>
          
@@ -10,4 +10,4 @@ function Home() {
     );
 }
 
-export default Home; 
+export default App; 

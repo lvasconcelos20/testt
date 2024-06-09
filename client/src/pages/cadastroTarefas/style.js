@@ -86,3 +86,13 @@ export const Button = styled.button`
     background-color: #007bff;
   }
 `;
+
+
+export const BoxFinish = styled.div`
+  display: flex;
+  align-items: center; // Mantém os elementos na mesma linha
+  gap: 10px; // Espaço entre os elementos
+  margin-bottom: 10px;
+  margin-left: 10vw;
+  margin-top: 10px// Espaço inferior para o container
+`

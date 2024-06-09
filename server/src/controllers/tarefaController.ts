@@ -8,6 +8,12 @@ export class TarefaController {
   async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const tarefaData = Tarefa.parse(req.body);
+
+      // Verifica se o campo de data_termino está no formato correto
+      if (tarefaData.data_termino && !/^\d{4}-\d{2}-\d{2}$/.test(tarefaData.data_termino)) {
+        return res.status(400).json({ message: 'A data deve estar no formato 0000-00-00' });
+      }
+
       const existingTarefa = await TarefaRepository.findTarefaByName(tarefaData.name);
 
       if (existingTarefa) {
@@ -15,11 +21,10 @@ export class TarefaController {
       }
 
       if (tarefaData.finalizada) {
-        if (tarefaData.data_termino) {
-          tarefaData.data_termino = new Date(tarefaData.data_termino).toISOString();
-        } else {
+        if (!tarefaData.data_termino) {
           return res.status(400).json({ message: 'Data de término é obrigatória para tarefas finalizadas' });
         }
+        tarefaData.data_termino = new Date(tarefaData.data_termino).toISOString();
       }
 
       const newTarefa = await TarefaRepository.create(tarefaData);
