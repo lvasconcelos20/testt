@@ -11,18 +11,18 @@ export const middlewareFindByEmail = async (req: Request, res: Response, next: N
   const { email } = req.params;
 
   try {
-      const membro = await prisma.member.findUnique({
-          where: { email }
-      });
+    const membro = await prisma.member.findUnique({
+      where: { email }
+    });
 
-      if (!membro) {
-          return res.status(404).json({ message: 'Membro não encontrado' });
-      }
+    if (!membro) {
+      return res.status(404).json({ message: 'Membro não encontrado' });
+    }
 
-      next();
+    next();
   } catch (error) {
-      next(error);
-  } 
+    next(error);
+  }
 };
 
 // Roteamento das operações CRUD
@@ -36,14 +36,14 @@ tarefaRouter.route('/')
   });
 
 tarefaRouter.route('/:email')
-  .get(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+  .get(middlewareFindByEmail, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.status(200).json(req.tarefa);
+      await tarefaController.getTarefasByEmail(req, res, next);
     } catch (error) {
       next(error);
     }
   })
-  .patch(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+  .patch(middlewareFindByEmail, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const updatedTarefa = await tarefaController.update(req, res, next);
       res.status(200).json(updatedTarefa);
@@ -51,10 +51,10 @@ tarefaRouter.route('/:email')
       next(error);
     }
   })
-  .delete(middlewareFindByEmail, async (req: Request & { tarefa?: Tarefa }, res: Response, next: NextFunction) => {
+  .delete(middlewareFindByEmail, async (req: Request, res: Response, next: NextFunction) => {
     try {
       await tarefaController.delete(req, res, next);
-    } catch (error) {
+    } catch (error) { 
       next(error);
     }
   });
