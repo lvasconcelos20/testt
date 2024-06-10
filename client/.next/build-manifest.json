@@ -12,6 +12,11 @@
   ],
   "rootMainFiles": [],
   "pages": {
+    "/": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/index.js"
+    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -22,15 +27,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/cadastroTarefas": [
+    "/cadastro-membro": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/cadastroTarefas.js"
-    ],
-    "/editTarefa": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/editTarefa.js"
+      "static/chunks/pages/cadastro-membro.js"
     ],
     "/listagemTarefas": [
       "static/chunks/webpack.js",

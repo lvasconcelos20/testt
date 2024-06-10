@@ -1,4 +1,4 @@
-
+// style.js
 import styled from 'styled-components';
 
 export const Page = styled.div`
@@ -6,43 +6,52 @@ export const Page = styled.div`
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f0f0f0;
+    background-color: #f9f9f9;
+    padding: 20px;
 `;
 
 export const Container = styled.div`
-    width: 80%;
-    max-width: 800px;
+    width: 70%;
+    max-width: 900px;
     background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 50vh;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
-export const Tittle = styled.h2`
-display: flex;
- align-items: center;
- justify-content: center;
-
-`
+export const Title = styled.h2`
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+`;
 
 export const Menu = styled.div`
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 20px;
     margin-top: 20px;
 `;
 
 export const Button = styled.button`
-    background-color: #007bff;
+    background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 20px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 
     &:hover {
-        background-color: #0056b3;
+        background-color: #45a049;
     }
 `;
 
+export const StyledCard = styled.div`
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
