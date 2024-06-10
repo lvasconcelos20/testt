@@ -3,6 +3,7 @@ import prisma from '../database';
 import { TarefaCreateInput } from '../DTOs';
 
 class TarefaRepository {
+  [x: string]: any;
   async getTarefasByMemberEmail(email: string): Promise<Tarefa[]> {
     const tarefas = await prisma.tarefa.findMany({
       where: {

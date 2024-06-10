@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import api from '../../services/api';
 import { Container, Form, Input, Button, Page } from './style';
@@ -6,15 +5,36 @@ import { Container, Form, Input, Button, Page } from './style';
 const CadastroMembro = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [errors, setErrors] = useState({});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Verificar se todos os campos obrigatórios foram preenchidos
+        if (!name || !email || !password) {
+            setErrors({
+                name: !name ? 'Nome é obrigatório' : undefined,
+                email: !email ? 'Email é obrigatório' : undefined,
+                password: !password ? 'A senha é obrigatória' : undefined,
+            });
+            return;
+        }
+
+        // Verificar se a senha tem pelo menos 3 caracteres
+        if (password.length < 3) {
+            setErrors({
+                ...errors,
+                password: 'A senha deve ter no mínimo 3 caracteres',
+            });
+            return;
+        }
+
         const membro = {
             name,
             email,
+            password,
         };
 
         try {
@@ -24,6 +44,7 @@ const CadastroMembro = () => {
                 alert('Membro cadastrado com sucesso!');
                 setName('');
                 setEmail('');
+                setPassword('');
                 setErrors({});
                 setError('');
             }
@@ -67,6 +88,13 @@ const CadastroMembro = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     {errors.email && <p style={{ color: 'red' }}>{errors.email}</p>}
+                    <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    {errors.password && <p style={{ color: 'red' }}>{errors.password}</p>}
                     {error && <p style={{ color: 'red' }}>{error}</p>}
                     <Button type="submit">Cadastrar</Button>
                 </Form>

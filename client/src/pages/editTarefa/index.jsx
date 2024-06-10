@@ -12,6 +12,8 @@ const UpdateTarefa = () => {
   const [tarefaData, setTarefaData] = useState(null);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState(''); // 'success' ou 'error'
 
   useEffect(() => {
     if (tarefaData) {
@@ -50,8 +52,8 @@ const UpdateTarefa = () => {
       const response = await api.patch(`/tarefa/${membroEmail}`, tarefaAtualizada);
 
       if (response.status === 200) {
-        alert('Tarefa atualizada com sucesso!');
-        setTarefaData(null);
+        setAlertMessage('Tarefa atualizada com sucesso!');
+        setAlertType('success');
         setName('');
         setDescricao('');
         setFinalizada(false);
@@ -70,19 +72,30 @@ const UpdateTarefa = () => {
         if (error.response.status === 400) {
           if (error.response.data.message.includes('Nome já existe')) {
             errorMessage = 'Uma tarefa com este nome já existe';
-          } else if (error.response.data.message.includes('Data de término é obrigatória para tarefas finalizadas')) {  
+          } else if (error.response.data.message.includes('Data de término é obrigatória para tarefas finalizadas')) {
             errorMessage = 'Data de término é obrigatória para tarefas finalizadas';
           } else if (error.response.data.message.includes('Membro não cadastrado no sistema')) {
             errorMessage = 'Membro não cadastrado no sistema';
+          } else {
+            errorMessage = 'Erro ao atualizar tarefa, tente novamente mais tarde';
           }
         } else if (error.response.status === 404) {
           errorMessage = 'Membro não encontrado. Tente Novamente.';
         } else if (error.response.status === 403) {
           errorMessage = 'Tarefas finalizadas não podem ser editadas';
         }
+      } else if (!error.response) {
+        errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
       }
 
       setError(errorMessage);
+      setAlertMessage(errorMessage);
+      setAlertType('error');
+
+      // Reseta após 5 segundos
+      setTimeout(() => {
+        setAlertMessage('');
+      }, 5000);
     }
   };
 
@@ -91,8 +104,8 @@ const UpdateTarefa = () => {
       const response = await api.delete(`/tarefa/${membroEmail}`);
 
       if (response.status === 200) {
-        alert('Tarefa deletada com sucesso!');
-        setTarefaData(null);
+        setAlertMessage('Tarefa deletada com sucesso!');
+        setAlertType('success');
         setName('');
         setDescricao('');
         setFinalizada(false);
@@ -113,7 +126,14 @@ const UpdateTarefa = () => {
         errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
       }
 
-      alert(errorMessage);
+      setError(errorMessage);
+      setAlertMessage(errorMessage);
+      setAlertType('error');
+
+      // Reseta após 5 segundos
+      setTimeout(() => {
+        setAlertMessage('');
+      }, 5000);
     }
   };
 
@@ -121,6 +141,9 @@ const UpdateTarefa = () => {
     <Page>
       <Container>
         <h2>Edição de Tarefa</h2>
+        {alertMessage && (
+          <p style={{ color: alertType === 'error' ? 'red' : 'green' }}>{alertMessage}</p>
+        )}
         <Form onSubmit={handleSubmit}>
           <Input
             type="text"

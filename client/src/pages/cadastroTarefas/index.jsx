@@ -5,12 +5,14 @@ import { Container, Form, Input, TextArea, Select, Button, BoxFinish, Page } fro
 const CadastroTarefa = () => {
     const [name, setName] = useState('');
     const [descricao, setDescricao] = useState('');
-    const [finalizada, setFinalizada] = useState('n'); 
+    const [finalizada, setFinalizada] = useState('n');
     const [dataTerminoStr, setDataTerminoStr] = useState('');
     const [prioridade, setPrioridade] = useState('baixa');
     const [membroEmail, setMembroEmail] = useState('');
-    const [error, setError] = useState(''); 
+    const [error, setError] = useState('');
     const [errors, setErrors] = useState({});
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState(''); // 'success' ou 'error'
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,22 +20,22 @@ const CadastroTarefa = () => {
         const dataTermino = dataTerminoStr ? dataTerminoStr.replace(/[^0-9]/g, '') : undefined;
         const formattedDataTermino = dataTermino ? dataTermino.slice(0, 4) + '-' + dataTermino.slice(4, 6) + '-' + dataTermino.slice(6) : undefined;
 
-    
         const finalizadaBool = finalizada === 's';
 
         const tarefa = {
             name,
             descricao,
-            finalizada: finalizadaBool, 
+            finalizada: finalizadaBool,
             data_termino: formattedDataTermino,
             prioridade,
             membroEmail,
         };
 
         try {
-            const response = await api.post('/tarefa', tarefa); 
+            const response = await api.post('/tarefa', tarefa);
             if (response.status === 201) {
-                alert('Tarefa cadastrada com sucesso!');
+                setAlertMessage('Tarefa cadastrada com sucesso!');
+                setAlertType('success');
                 setName('');
                 setDescricao('');
                 setFinalizada('n');
@@ -41,12 +43,9 @@ const CadastroTarefa = () => {
                 setPrioridade('baixa');
                 setMembroEmail('');
                 setErrors({});
-                setError(''); 
+                setError('');
             }
         } catch (error) {
-            console.error('Erro ao cadastrar a tarefa:', error);
-
-         
             let errorMessage = 'Erro ao cadastrar a tarefa. Por favor, tente novamente.';
 
             if (error.response) {
@@ -68,13 +67,23 @@ const CadastroTarefa = () => {
             }
 
             setError(errorMessage);
+            setAlertMessage(errorMessage);
+            setAlertType('error');
+
+            // Reseta após 5 segundos
+            setTimeout(() => {
+                setAlertMessage('');
+            }, 5000);
         }
     };
 
     return (
         <Page>
             <Container>
-                <h2>Cadastro de Tarefa</h2>
+                Cadastro de Tarefa
+                {alertMessage && (
+                    <p style={{ color: alertType === 'error' ? 'red' : 'green' }}>{alertMessage}</p>
+                )}
                 <Form onSubmit={handleSubmit}>
                     <Input
                         type="text"
@@ -112,7 +121,7 @@ const CadastroTarefa = () => {
                         <span>Finalizada</span>
                         <Input
                             type="checkbox"
-                            checked={finalizada === 's'} 
+                            checked={finalizada === 's'}
                             onChange={(e) => setFinalizada(e.target.checked ? 's' : 'n')}
                         />
                     </BoxFinish>

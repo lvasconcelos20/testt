@@ -38,12 +38,12 @@ const ListTarefas = () => {
     setSelectedTask(task);
   };
 
-  const handleUpdateFinalizada = async (taskId, finalizada) => {
+  const handleUpdateFinalizada = async (email, finalizada) => {
     try {
-      await api.patch(`/tarefa/${taskId}`, { finalizada });
+      await api.patch(`/tarefa/${email}`, { finalizada });
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === taskId ? { ...task, finalizada } : task
+          task.email === email ? { ...task, finalizada } : task
         )
       );
     } catch (error) {
@@ -51,17 +51,37 @@ const ListTarefas = () => {
     }
   };
 
-  const handleDeleteButtonClick = async (taskId) => {
+  const handleDelete = async (name, email) => {
     try {
-      await api.delete(`/tarefa/${taskId}`);
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      const tarefaToDelete = tasks.find((task) => task.name === name && task.email === email);
+
+      if (tarefaToDelete) {
+        await api.delete(`/tarefa/${tarefaToDelete.email}`);
+        // Atualiza a lista de tarefas para refletir a exclusão
+        setTasks((prevTasks) => prevTasks.filter((task) => task.email !== email || task.name !== name));
+        if (selectedTask?.email === tarefaToDelete.email) {
+          setSelectedTask(null);
+        }
+      } else {
+        throw new Error("Tarefa não encontrada");
+      }
     } catch (error) {
       console.error('Erro ao excluir tarefa:', error);
+
+      let errorMessage = 'Erro ao excluir a tarefa. Por favor, tente novamente.';
+
+      if (error.response && error.response.status === 404) {
+        errorMessage = 'Tarefa não encontrada. Tente novamente.';
+      } else if (!error.response) {
+        errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
+      }
+
+      console.error(errorMessage);
     }
   };
 
   const handleNextEdit = () => {
-    if (selectedTask.finalizada) return;
+    if (selectedTask?.finalizada) return;
     router.push('../editTarefa');
   };
 
@@ -92,10 +112,10 @@ const ListTarefas = () => {
                 <TaskItem
                   key={index}
                   onClick={() => handleTaskClick(tarefa)}
-                  className={selectedTask?.id === tarefa.id ? 'selected' : ''}
+                  className={selectedTask?.email === tarefa.email ? 'selected' : ''}
                 >
                   Nome: {tarefa.name}, Prioridade: {tarefa.prioridade}, Finalizada: {tarefa.finalizada ? 'Sim' : 'Não'}
-                  {selectedTask?.id === tarefa.id && (
+                  {selectedTask?.email === tarefa.email && (
                     <TaskDetails>
                       <h3>Descrição:</h3>
                       <p>{tarefa.descricao}</p>
@@ -105,7 +125,7 @@ const ListTarefas = () => {
                           <input
                             type="checkbox"
                             checked={tarefa.finalizada}
-                            onChange={(e) => handleUpdateFinalizada(tarefa.id, e.target.checked)}
+                            onChange={(e) => handleUpdateFinalizada(tarefa.email, e.target.checked)}
                             disabled={tarefa.finalizada} // Desabilita o checkbox se finalizada
                           />
                         </label>
@@ -116,8 +136,7 @@ const ListTarefas = () => {
                           Editar Tarefa
                         </EditButton>
                         <DeleteButton
-                          onClick={() => handleDeleteButtonClick(tarefa.id)}
-                          disabled={tarefa.finalizada} // Desabilita o botão se finalizada
+                          onClick={() => handleDelete(tarefa.name, tarefa.email)}
                         >
                           Excluir Tarefa
                         </DeleteButton>

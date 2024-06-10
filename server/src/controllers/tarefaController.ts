@@ -125,19 +125,19 @@ export class TarefaController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const { email } = req.params;
-      const tarefas = await TarefaRepository.findTarefaByEmail(email);
-
-      if (!tarefas || tarefas.length === 0) {
+      const { name, email } = req.params;
+      const tarefa = await TarefaRepository.findTarefaByNameAndEmail(name, email); // Adicione método adequado para encontrar pela combinação de nome e e-mail.
+  
+      if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
       }
-
-      const deleteResult = await TarefaRepository.delete(email);
-
+  
+      const deleteResult = await TarefaRepository.delete(tarefa.id); // Assume que deletar por ID é mais seguro.
+  
       if (!deleteResult) {
         return res.status(500).json({ message: 'Erro ao deletar tarefa' });
       }
-
+  
       res.status(200).json({ message: 'Tarefa deletada com sucesso' });
     } catch (error) {
       next(error);

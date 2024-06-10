@@ -59,7 +59,7 @@ class AuthController {
             }
 
             const accessToken = jwt.sign({ id: decodedToken.id }, process.env.JWT_SECRET as string, {
-                expiresIn: '30s',
+                expiresIn: '1d',
             });
 
             const { password: _, ...memberData } = member;

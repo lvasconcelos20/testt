@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import { MemberRepository } from '../repository';
 import { Member, UpdateMember } from '../DTOs';
 
+
 class MemberController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
