@@ -1,4 +1,4 @@
-// routes/tarefaRouter.ts
+
 import { Router, Request, Response, NextFunction } from 'express';
 import { TarefaController } from '../controllers';
 import { Tarefa } from '@prisma/client';
@@ -25,7 +25,7 @@ export const middlewareFindByEmail = async (req: Request, res: Response, next: N
   }
 };
 
-// Roteamento das operações CRUD
+
 tarefaRouter.route('/')
   .post(async (req, res, next) => {
     try {
