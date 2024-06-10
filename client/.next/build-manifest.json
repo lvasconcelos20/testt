@@ -31,11 +31,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/editTarefa.js"
-    ],
-    "/listagemTarefas": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/listagemTarefas.js"
     ]
   },
   "ampFirstPages": []
