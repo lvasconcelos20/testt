@@ -66,19 +66,19 @@ O projeto “To Do List” é uma aplicação web desenvolvida para gerenciar ta
 3. **Instalação das dependências:**
    - No diretório do projeto, rode o comando:
      ```bash
-     npm install
+     yarn install
      ```
 
 4. **Rodar o servidor:**
    - No diretório do back-end do projeto, rode o comando:
      ```bash
-     npm run dev
+     yarn dev
      ```
 
 5. **Rodar o front-end:**
    - No diretório do front-end do projeto, rode o comando:
      ```bash
-     npm run dev
+     yarn dev
      ```
 
 6. **Acessar a aplicação:**
