@@ -1,8 +1,7 @@
-// style.js
+
 
 import styled from 'styled-components';
 
-// Estilo principal da página
 export const Page = styled.div`
   display: flex;
   justify-content: center;
@@ -11,7 +10,7 @@ export const Page = styled.div`
   background-color: #f3f3f3;
 `;
 
-// Container principal para o conteúdo
+
 export const Container = styled.div`
   width: 80%;
   max-width: 800px;
@@ -21,13 +20,12 @@ export const Container = styled.div`
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 `;
 
-// Formulário de entrada
 export const Form = styled.form`
   display: flex;
   margin-bottom: 20px;
 `;
 
-// Campo de entrada de texto
+
 export const Input = styled.input`
   flex: 1;
   padding: 10px;
@@ -37,12 +35,12 @@ export const Input = styled.input`
   font-size: 16px;
 `;
 
-// Lista de tarefas
+
 export const TaskList = styled.div`
   margin-bottom: 20px;
 `;
 
-// Item na lista de tarefas
+
 export const TaskItem = styled.div`
   padding: 15px;
   background-color: #fff;

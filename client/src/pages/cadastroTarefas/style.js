@@ -26,8 +26,8 @@ export const Container = styled.div`
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
-  width: 300px; /* Ajuste conforme necessário */
-  gap: 10px; /* Adicionando espaço entre os campos */
+  width: 300px; 
+  gap: 10px; 
 `;
 
 export const Input = styled.input`
@@ -90,9 +90,9 @@ export const Button = styled.button`
 
 export const BoxFinish = styled.div`
   display: flex;
-  align-items: center; // Mantém os elementos na mesma linha
-  gap: 10px; // Espaço entre os elementos
+  align-items: center; 
+  gap: 10px; 
   margin-bottom: 10px;
   margin-left: 10vw;
-  margin-top: 10px// Espaço inferior para o container
+  margin-top: 10px
 `
