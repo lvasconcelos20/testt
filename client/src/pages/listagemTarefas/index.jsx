@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Container, Form, Input, TaskList, TaskItem, Page, Loading, NoResults, TaskDetails, EditButton, DeleteButton, Button } from './style';
+import { Container, Form, Input, Button, TaskList, TaskItem, Page, Loading, NoResults, TaskDetails, EditButton, DeleteButton } from './style';
 import { useRouter } from 'next/router';
-
 const ListTarefas = () => {
   const [tasks, setTasks] = useState([]);
   const [email, setEmail] = useState('');
@@ -11,15 +10,13 @@ const ListTarefas = () => {
   const [selectedTask, setSelectedTask] = useState(null); // Estado para armazenar a tarefa selecionada
   const [editMode, setEditMode] = useState(false); // Estado para controle do modo de edição
 
-  const router = useRouter();
-
   useEffect(() => {
-    if (email) {
-      listarTarefas(); // Executa a busca assim que o email mudar
-    }
+    listarTarefas(); // Executa a busca assim que o email mudar
   }, [email]);
 
   const listarTarefas = async () => {
+    if (!email) return;
+
     setIsLoading(true);
 
     try {
@@ -40,14 +37,14 @@ const ListTarefas = () => {
   const handleTaskClick = (task) => {
     setSelectedTask(task);
   };
-
+  const router = useRouter();
   const handleNextEdit = () => {
     router.push('../editTarefa');
   };
- 
-  const handleNextCadastro = () => {
-    router.push('../cadastroTarefas');
-  };
+  const handleNextCadastro = () =>{
+    router.push('../cadastroTarefas')
+  }
+
 
   const handleDeleteButtonClick = async (taskId) => {
     try {
@@ -96,31 +93,32 @@ const ListTarefas = () => {
                 <TaskItem
                   key={index}
                   onClick={() => handleTaskClick(tarefa)}
-                  className={selectedTask?.id === tarefa.id ? 'selected' : ''}
                 >
                   Nome: {tarefa.name}, Prioridade: {tarefa.prioridade}, Finalizada: {tarefa.finalizada ? 'Sim' : 'Não'}
                   {selectedTask?.id === tarefa.id && (
-                    <TaskDetails>
+                    <TaskDetails onClick={handleNextEdit}>
                       <h3>Descrição:</h3>
                       <p>{tarefa.descricao}</p>
-                      <div>
-                        <label>
-                          Finalizada:
-                          <input
-                            type="checkbox"
-                            checked={tarefa.finalizada}
-                            onChange={(e) => handleUpdateFinalizada(tarefa.id, e.target.checked)}
-                          />
-                        </label>
-                        <EditButton onClick={handleNextEdit}>Editar Tarefa</EditButton>
-                        <DeleteButton onClick={() => handleDeleteButtonClick(tarefa.id)}>Excluir Tarefa</DeleteButton>
-                      </div>
+                      {editMode && (
+                        <div>
+                          <label>
+                            Finalizada:
+                            <input
+                              type="checkbox"
+                              checked={tarefa.finalizada}
+                              onChange={(e) => handleUpdateFinalizada(tarefa.id, e.target.checked)}
+                            />
+                          </label>
+                          <EditButton onClick={() => setEditMode(false)}>Cancelar Edição</EditButton>
+                          <DeleteButton onClick={() => handleDeleteButtonClick(tarefa.id)}>Excluir Tarefa</DeleteButton>
+                        </div>
+                      )}
                     </TaskDetails>
                   )}
                 </TaskItem>
               ))}
             </TaskList>
-            <Button onClick={handleNextCadastro}>Criar Nova Tarefa</Button>
+            <Button onClick={handleNextCadastro} >Criar Nova Tarefa</Button>
           </>
         )}
       </Container>
