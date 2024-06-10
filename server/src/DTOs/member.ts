@@ -16,6 +16,9 @@ export const Member = z.object({
 
   })
   .email({ message: 'Endereço de email inválido' }),
+  password: z
+  .string({ invalid_type_error: 'A senha deve ser uma string' })
+  .min(3, { message: 'A senha deve ter no mínimo 3 caracteres' }),
 
 });
 

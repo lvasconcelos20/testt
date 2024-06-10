@@ -7,10 +7,12 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.15.0",
+    "@types/jws": "^3.2.10",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "jws": "^4.0.0",
     "prisma": "^5.15.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
