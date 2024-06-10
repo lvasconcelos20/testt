@@ -8,19 +8,17 @@ const ListTarefas = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null); // Estado para armazenar a tarefa selecionada
-  const [editMode, setEditMode] = useState(false); // Estado para controle do modo de edição
+  const [selectedTask, setSelectedTask] = useState(null); 
   const router = useRouter();
 
   useEffect(() => {
     if (email) {
-      listarTarefas(); // Executa a busca assim que o email mudar
+      listarTarefas();
     }
   }, [email]);
 
   const listarTarefas = async () => {
     setIsLoading(true);
-
     try {
       const response = await api.get(`/tarefa/${email}`);
       if (response.data.length === 0) {
@@ -38,13 +36,11 @@ const ListTarefas = () => {
 
   const handleTaskClick = (task) => {
     setSelectedTask(task);
-    setEditMode(false); // Reinicia o modo de edição ao selecionar uma nova tarefa
   };
 
   const handleUpdateFinalizada = async (taskId, finalizada) => {
     try {
       await api.patch(`/tarefa/${taskId}`, { finalizada });
-      // Atualiza o estado das tarefas após a atualização bem-sucedida
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.id === taskId ? { ...task, finalizada } : task
@@ -58,7 +54,6 @@ const ListTarefas = () => {
   const handleDeleteButtonClick = async (taskId) => {
     try {
       await api.delete(`/tarefa/${taskId}`);
-      // Remove a tarefa do estado após exclusão bem-sucedida
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
     } catch (error) {
       console.error('Erro ao excluir tarefa:', error);
@@ -66,11 +61,12 @@ const ListTarefas = () => {
   };
 
   const handleNextEdit = () => {
-    router.push(`/editTarefa/${selectedTask.id}`); // Redireciona para a tela de edição de tarefas com o id da tarefa
+    if (selectedTask.finalizada) return;
+    router.push('../editTarefa');
   };
 
   const handleNextCadastro = () => {
-    router.push('/cadastroTarefas'); // Redireciona para a tela de cadastro de tarefas
+    router.push('../cadastroTarefas');
   };
 
   return (
@@ -110,10 +106,21 @@ const ListTarefas = () => {
                             type="checkbox"
                             checked={tarefa.finalizada}
                             onChange={(e) => handleUpdateFinalizada(tarefa.id, e.target.checked)}
+                            disabled={tarefa.finalizada} // Desabilita o checkbox se finalizada
                           />
                         </label>
-                        <EditButton onClick={handleNextEdit}>Editar Tarefa</EditButton>
-                        <DeleteButton onClick={() => handleDeleteButtonClick(tarefa.id)}>Excluir Tarefa</DeleteButton>
+                        <EditButton
+                          onClick={handleNextEdit}
+                          disabled={tarefa.finalizada} // Desabilita o botão se finalizada
+                        >
+                          Editar Tarefa
+                        </EditButton>
+                        <DeleteButton
+                          onClick={() => handleDeleteButtonClick(tarefa.id)}
+                          disabled={tarefa.finalizada} // Desabilita o botão se finalizada
+                        >
+                          Excluir Tarefa
+                        </DeleteButton>
                       </div>
                     </TaskDetails>
                   )}
