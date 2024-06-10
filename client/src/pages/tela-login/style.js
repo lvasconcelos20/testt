@@ -1,4 +1,3 @@
-
 import styled from 'styled-components';
 
 export const Page = styled.div`
@@ -54,4 +53,29 @@ export const StyledCard = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+`;
+
+export const Input = styled.input`
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+`;
+
+export const Form = styled.form`
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+export const NavLink = styled.a`
+    margin-top: 15px;
+    color: #4CAF50;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+    }
 `;
