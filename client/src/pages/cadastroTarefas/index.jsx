@@ -46,7 +46,7 @@ const CadastroTarefa = () => {
         } catch (error) {
             console.error('Erro ao cadastrar a tarefa:', error);
 
-            // Obtenha a mensagem de erro do backend
+         
             let errorMessage = 'Erro ao cadastrar a tarefa. Por favor, tente novamente.';
 
             if (error.response) {
@@ -112,7 +112,7 @@ const CadastroTarefa = () => {
                         <span>Finalizada</span>
                         <Input
                             type="checkbox"
-                            checked={finalizada === 's'} // Converte para booleano na verificação
+                            checked={finalizada === 's'} 
                             onChange={(e) => setFinalizada(e.target.checked ? 's' : 'n')}
                         />
                     </BoxFinish>
