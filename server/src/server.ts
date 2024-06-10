@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import './database';
 import { memberRouter, tarefaRouter, authRouter } from './routes';
 
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002; 

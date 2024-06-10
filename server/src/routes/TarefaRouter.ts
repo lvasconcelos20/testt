@@ -1,7 +1,6 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { TarefaController } from '../controllers';
-import { Tarefa } from '@prisma/client';
 import prisma from '../database';
 
 const tarefaRouter = Router();

@@ -3,6 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/listagemTarefas": "pages/listagemTarefas.js",
-  "/": "pages/index.js",
-  "/cadastro-membro": "pages/cadastro-membro.js"
+  "/editTarefa": "pages/editTarefa.js",
+  "/cadastroTarefas": "pages/cadastroTarefas.js"
 }

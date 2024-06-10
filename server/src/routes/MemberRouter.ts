@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authMiddleware from '../middleware/auth';
+
 
 import { MemberController } from '../controllers';
 
@@ -12,7 +12,9 @@ memberRouter.route('/')
 
   memberRouter.route('/:memberId')
   .get(MemberController.read)
-  .patch([authMiddleware], MemberController.update)
-  .delete([authMiddleware], MemberController.delete);
+  .patch( MemberController.update)
+  .delete( MemberController.delete);
+
+  
   
 export default memberRouter;  
