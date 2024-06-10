@@ -5,7 +5,6 @@ import Home from './telaHome';
 function App() {
   return (
     <Home/>
-
   );
 }
 

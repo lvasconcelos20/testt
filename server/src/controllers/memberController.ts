@@ -1,21 +1,34 @@
 import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcrypt'
 import { MemberRepository } from '../repository';
 import { Member, UpdateMember } from '../DTOs';
 
 class MemberController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
+      
       const memberData = Member.parse(req.body);
 
+     
       const existingMember = await MemberRepository.findByEmail(memberData.email);
 
       if (existingMember) {
+   
         return res.status(400).json({
           message: 'Este e-mail já está registrado',
         });
       }
 
-      const newMember = await MemberRepository.create(memberData);
+      const hashedPassword = await bcrypt.hash(memberData.password, 10);
+
+      const memberDataWithHashedPassword = {
+        ...memberData,
+        password: hashedPassword,
+      };
+
+  
+      const newMember = await MemberRepository.create(memberDataWithHashedPassword);
+
       res.status(201).json(newMember);
     } catch (error) {
       next(error);
@@ -45,6 +58,11 @@ class MemberController {
     try {
       const { memberId } = req.params;
       const memberData = UpdateMember.parse(req.body);
+      
+      if (memberData.password) {
+        const hashedPassword = await bcrypt.hash(memberData.password, 10);
+        memberData.password = hashedPassword;
+      }
 
       const updatedMember = await MemberRepository.update(Number(memberId), memberData);
 
