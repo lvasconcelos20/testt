@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/telaHome": "pages/telaHome.js",
   "/listagemTarefas": "pages/listagemTarefas.js",
-  "/editTarefa": "pages/editTarefa.js",
-  "/cadastroTarefas": "pages/cadastroTarefas.js"
+  "/cadastro-membro": "pages/cadastro-membro.js"
 }
