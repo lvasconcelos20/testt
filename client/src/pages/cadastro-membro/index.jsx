@@ -12,7 +12,7 @@ const CadastroMembro = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Verificar se todos os campos obrigatórios foram preenchidos
+ 
         if (!name || !email || !password) {
             setErrors({
                 name: !name ? 'Nome é obrigatório' : undefined,
@@ -22,7 +22,6 @@ const CadastroMembro = () => {
             return;
         }
 
-        // Verificar se a senha tem pelo menos 3 caracteres
         if (password.length < 3) {
             setErrors({
                 ...errors,
