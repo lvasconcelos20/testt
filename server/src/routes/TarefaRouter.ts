@@ -1,4 +1,3 @@
-
 import { Router, Request, Response, NextFunction } from 'express';
 import { TarefaController } from '../controllers';
 import prisma from '../database';
@@ -23,7 +22,6 @@ export const middlewareFindByEmail = async (req: Request, res: Response, next: N
     next(error);
   }
 };
-
 
 tarefaRouter.route('/')
   .post(async (req, res, next) => {
@@ -52,8 +50,9 @@ tarefaRouter.route('/:email')
   })
   .delete(middlewareFindByEmail, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await tarefaController.delete(req, res, next);
-    } catch (error) { 
+      const { name, email } = req.params;
+      await tarefaController.deleteByNameAndEmail(name, email, req, res, next);
+    } catch (error) {
       next(error);
     }
   });

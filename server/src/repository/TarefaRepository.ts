@@ -3,25 +3,15 @@ import prisma from '../database';
 import { TarefaCreateInput } from '../DTOs';
 
 class TarefaRepository {
-  [x: string]: any;
   async getTarefasByMemberEmail(email: string): Promise<Tarefa[]> {
-    const tarefas = await prisma.tarefa.findMany({
-      where: {
-        membro: {
-          email: email,
-        },
-      },
-      include: {
-        membro: true,
-      },
+    return await prisma.tarefa.findMany({
+      where: { membroEmail: email },
+      include: { membro: true },
     });
-    return tarefas;
   }
 
   async create(data: TarefaCreateInput): Promise<Tarefa> {
-    return await prisma.tarefa.create({
-      data,
-    });
+    return await prisma.tarefa.create({ data });
   }
 
   async update(email: string, data: {
@@ -54,26 +44,17 @@ class TarefaRepository {
       throw new Error('Nenhuma tarefa encontrada para atualizar');
     }
 
-    const tarefa = await prisma.tarefa.findFirst({
+    return await prisma.tarefa.findFirst({
       where: { membroEmail: membro.email, name: data.name },
       include: { membro: true },
     });
-
-    return tarefa;
   }
 
   async findTarefaByEmail(email: string): Promise<Tarefa[]> {
-    const tarefas = await prisma.tarefa.findMany({
-      where: {
-        membro: {
-          email: email,
-        },
-      },
-      include: {
-        membro: true,
-      },
+    return await prisma.tarefa.findMany({
+      where: { membroEmail: email },
+      include: { membro: true },
     });
-    return tarefas;
   }
 
   async findTarefaByName(name: string): Promise<Tarefa | null> {
@@ -83,6 +64,25 @@ class TarefaRepository {
     });
   }
 
+  async findTarefaByNameAndEmail(name: string, email: string): Promise<Tarefa | null> {
+    return await prisma.tarefa.findFirst({
+      where: { name, membroEmail: email },
+      include: { membro: true },
+    });
+  }
+
+  async deleteTarefaByNameAndEmail(name: string, email: string): Promise<boolean> {
+    try {
+      await prisma.tarefa.deleteMany({
+        where: { name, membroEmail: email },
+      });
+      return true;
+    } catch (error) {
+      console.error('Erro ao deletar tarefa:', error);
+      return false;
+    }
+  }
+
   async findAll(): Promise<Tarefa[]> {
     return await prisma.tarefa.findMany();
   }
@@ -90,11 +90,7 @@ class TarefaRepository {
   async delete(email: string): Promise<boolean> {
     try {
       await prisma.tarefa.deleteMany({
-        where: {
-          membro: {
-            email: email,
-          },
-        },
+        where: { membroEmail: email },
       });
       return true;
     } catch (error) {

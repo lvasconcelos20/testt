@@ -22,6 +22,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/cadastro-membro": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/cadastro-membro.js"
+    ],
     "/cadastroTarefas": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -36,6 +41,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/listagemTarefas.js"
+    ],
+    "/telaHome": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/telaHome.js"
     ]
   },
   "ampFirstPages": []

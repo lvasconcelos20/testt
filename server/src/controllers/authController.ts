@@ -28,7 +28,7 @@ class AuthController {
 
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // send only over HTTPS in production
+                secure: process.env.NODE_ENV === 'production', 
                 sameSite: 'strict',
             });
 

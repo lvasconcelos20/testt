@@ -59,14 +59,13 @@ export const TaskItem = styled.div`
   }
 `;
 
-// Detalhes da tarefa
+
 export const TaskDetails = styled.div`
   margin-top: 10px;
   padding: 15px;
   border-top: 1px solid #d3d3d3;
 `;
 
-// Botão de edição
 export const EditButton = styled.button`
   padding: 10px 20px;
   background-color: #007bff;
@@ -82,7 +81,7 @@ export const EditButton = styled.button`
   }
 `;
 
-// Botão de exclusão
+
 export const DeleteButton = styled.button`
   padding: 10px 20px;
   background-color: #dc3545;
@@ -97,7 +96,7 @@ export const DeleteButton = styled.button`
   }
 `;
 
-// Botão principal
+
 export const Button = styled.button`
   padding: 10px 20px;
   background-color: #28a745;
@@ -111,20 +110,5 @@ export const Button = styled.button`
   &:hover {
     background-color: #218838;
   }
-`;
-
-// Loading
-export const Loading = styled.div`
-  text-align: center;
-  padding: 20px;
-  font-size: 18px;
-`;
-
-// Mensagem de Nenhum Resultado
-export const NoResults = styled.div`
-  text-align: center;
-  padding: 20px;
-  font-size: 18px;
-  color: #6c757d;
 `;
 

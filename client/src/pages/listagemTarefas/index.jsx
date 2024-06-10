@@ -8,7 +8,8 @@ const ListTarefas = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null); 
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,31 +53,21 @@ const ListTarefas = () => {
   };
 
   const handleDelete = async (name, email) => {
-    try {
-      const tarefaToDelete = tasks.find((task) => task.name === name && task.email === email);
+    if (isDeleting) return;
+    setIsDeleting(true);
 
-      if (tarefaToDelete) {
-        await api.delete(`/tarefa/${tarefaToDelete.email}`);
-        // Atualiza a lista de tarefas para refletir a exclusão
-        setTasks((prevTasks) => prevTasks.filter((task) => task.email !== email || task.name !== name));
-        if (selectedTask?.email === tarefaToDelete.email) {
-          setSelectedTask(null);
-        }
-      } else {
-        throw new Error("Tarefa não encontrada");
-      }
+
+    setTasks((prevTasks) => prevTasks.filter((task) => task.name !== name || task.email !== email));
+
+    try {
+      await api.delete(`/tarefa/${name}/${email}`);
     } catch (error) {
       console.error('Erro ao excluir tarefa:', error);
 
-      let errorMessage = 'Erro ao excluir a tarefa. Por favor, tente novamente.';
-
-      if (error.response && error.response.status === 404) {
-        errorMessage = 'Tarefa não encontrada. Tente novamente.';
-      } else if (!error.response) {
-        errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.';
-      }
-
-      console.error(errorMessage);
+  
+      listarTarefas();
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -101,54 +92,49 @@ const ListTarefas = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
         </Form>
-        {isLoading ? (
-          <Loading>Carregando...</Loading>
-        ) : noResults ? (
-          <NoResults>Nenhuma tarefa encontrada.</NoResults>
-        ) : (
-          <>
-            <TaskList>
-              {tasks.map((tarefa, index) => (
-                <TaskItem
-                  key={index}
-                  onClick={() => handleTaskClick(tarefa)}
-                  className={selectedTask?.email === tarefa.email ? 'selected' : ''}
-                >
-                  Nome: {tarefa.name}, Prioridade: {tarefa.prioridade}, Finalizada: {tarefa.finalizada ? 'Sim' : 'Não'}
-                  {selectedTask?.email === tarefa.email && (
-                    <TaskDetails>
-                      <h3>Descrição:</h3>
-                      <p>{tarefa.descricao}</p>
-                      <div>
-                        <label>
-                          Finalizada:
-                          <input
-                            type="checkbox"
-                            checked={tarefa.finalizada}
-                            onChange={(e) => handleUpdateFinalizada(tarefa.email, e.target.checked)}
-                            disabled={tarefa.finalizada} // Desabilita o checkbox se finalizada
-                          />
-                        </label>
-                        <EditButton
-                          onClick={handleNextEdit}
-                          disabled={tarefa.finalizada} // Desabilita o botão se finalizada
-                        >
-                          Editar Tarefa
-                        </EditButton>
-                        <DeleteButton
-                          onClick={() => handleDelete(tarefa.name, tarefa.email)}
-                        >
-                          Excluir Tarefa
-                        </DeleteButton>
-                      </div>
-                    </TaskDetails>
-                  )}
-                </TaskItem>
-              ))}
-            </TaskList>
-            <Button onClick={handleNextCadastro}>Criar Nova Tarefa</Button>
-          </>
-        )}
+        <>
+          <TaskList>
+            {tasks.map((tarefa, index) => (
+              <TaskItem
+                key={index}
+                onClick={() => handleTaskClick(tarefa)}
+                className={selectedTask?.email === tarefa.email ? 'selected' : ''}
+              >
+                Nome: {tarefa.name}, Prioridade: {tarefa.prioridade}, Finalizada: {tarefa.finalizada ? 'Sim' : 'Não'}
+                {selectedTask?.email === tarefa.email && (
+                  <TaskDetails>
+                    <h3>Descrição:</h3>
+                    <p>{tarefa.descricao}</p>
+                    <div>
+                      <label>
+                        Finalizada:
+                        <input
+                          type="checkbox"
+                          checked={tarefa.finalizada}
+                          onChange={(e) => handleUpdateFinalizada(tarefa.email, e.target.checked)}
+                          disabled={tarefa.finalizada} 
+                        />
+                      </label>
+                      <EditButton
+                        onClick={handleNextEdit}
+                        disabled={tarefa.finalizada} 
+                      >
+                        Editar Tarefa
+                      </EditButton>
+                      <DeleteButton
+                        onClick={() => handleDelete(tarefa.name, tarefa.email)}
+                        disabled={isDeleting} // Adiciona um estado de bloqueio para evitar múltiplos cliques
+                      >
+                        {isDeleting ? 'Deletando...' : 'Excluir Tarefa'}
+                      </DeleteButton>
+                    </div>
+                  </TaskDetails>
+                )}
+              </TaskItem>
+            ))}
+          </TaskList>
+          <Button onClick={handleNextCadastro}>Criar Nova Tarefa</Button>
+        </>
       </Container>
     </Page>
   );

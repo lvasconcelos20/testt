@@ -3,6 +3,7 @@ import TarefaRepository from '../repository/TarefaRepository';
 import { Tarefa, UpdateTarefa } from '../DTOs';
 
 export class TarefaController {
+  [x: string]: any;
   async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const tarefaData = Tarefa.parse(req.body);
@@ -123,21 +124,20 @@ export class TarefaController {
     }
   }
 
-  async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  async deleteByNameAndEmail(name: string, email: string, req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const { name, email } = req.params;
-      const tarefa = await TarefaRepository.findTarefaByNameAndEmail(name, email); // Adicione método adequado para encontrar pela combinação de nome e e-mail.
-  
+      const tarefa = await TarefaRepository.findTarefaByNameAndEmail(name, email);
+
       if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
       }
-  
-      const deleteResult = await TarefaRepository.delete(tarefa.id); // Assume que deletar por ID é mais seguro.
-  
+
+      const deleteResult = await TarefaRepository.deleteTarefaByNameAndEmail(name, email);
+
       if (!deleteResult) {
         return res.status(500).json({ message: 'Erro ao deletar tarefa' });
       }
-  
+
       res.status(200).json({ message: 'Tarefa deletada com sucesso' });
     } catch (error) {
       next(error);
