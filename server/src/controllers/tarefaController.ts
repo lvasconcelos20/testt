@@ -1,159 +1,175 @@
 import { Request, Response, NextFunction } from 'express';
-import TarefaRepository from '../repository/TarefaRepository'; // Certifique-se de que o caminho está correto
+import TarefaRepository from '../repository/TarefaRepository';
 import { Tarefa, UpdateTarefa } from '../DTOs';
-
-
 
 export class TarefaController {
   async create(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const tarefaData = Tarefa.parse(req.body); // Parseia os dados recebidos na requisição
-  
+      const tarefaData = Tarefa.parse(req.body);
+
       if (tarefaData.data_termino && !/^\d{4}-\d{2}-\d{2}$/.test(tarefaData.data_termino)) {
         return res.status(400).json({ message: 'A data deve estar no formato 0000-00-00' });
       }
-  
+
       const existingTarefa = await TarefaRepository.findTarefaByName(tarefaData.name);
-  
+
       if (existingTarefa) {
         return res.status(400).json({ message: 'Uma tarefa com este nome já existe' });
       }
-  
+
       if (tarefaData.finalizada) {
         if (!tarefaData.data_termino) {
           return res.status(400).json({ message: 'Data de término é obrigatória para tarefas finalizadas' });
         }
         tarefaData.data_termino = new Date(tarefaData.data_termino).toISOString();
       }
-  
-      const newTarefa = await TarefaRepository.create(tarefaData);
-  
+
+      const novaTarefa = await TarefaRepository.create(tarefaData);
+
       res.status(201).json({
         message: 'Tarefa criada com sucesso',
-        tarefa: newTarefa,
+        tarefa: novaTarefa,
       });
     } catch (error) {
       next(error);
     }
   }
+
   async read(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      const numericId = Number(id);
+      const { email } = req.params;
 
-      if (isNaN(numericId)) {
-        return res.status(400).json({ message: 'ID fornecido não é um número válido' });
+      if (!email) {
+        return res.status(400).json({ message: 'Email fornecido não é válido' });
       }
 
-      const tarefa = await TarefaRepository.findTarefaById(numericId);
+      const tarefas = await TarefaRepository.getTarefasByMemberEmail(email);
 
-      if (!tarefa) {
-        return next({
-          status: 404,
-          message: 'Tarefa não encontrada',
-        });
+      if (!tarefas || tarefas.length === 0) {
+        return res.status(404).json({ message: 'Nenhuma tarefa encontrada para este email.' });
       }
 
-      res.status(200).json(tarefa);
+      res.status(200).json(tarefas);
     } catch (error) {
       next(error);
     }
   }
- 
+
   async update(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        const { email } = req.params; 
-        const tarefaData = UpdateTarefa.parse(req.body);
+      const { email } = req.params;
+      const tarefaData = UpdateTarefa.parse(req.body);
 
-        // Verifica se os campos obrigatórios estão preenchidos
-        if (!tarefaData.name || !tarefaData.descricao || !tarefaData.prioridade || tarefaData.finalizada === undefined) {
-            return res.status(400).json({ mensagem: 'Nome, descrição, prioridade e finalizada são campos obrigatórios' });
-        }
+      if (!tarefaData.name || !tarefaData.descricao || !tarefaData.prioridade || tarefaData.finalizada === undefined) {
+        return res.status(400).json({ mensagem: 'Nome, descrição, prioridade e finalizada são campos obrigatórios' });
+      }
 
-        if (tarefaData.finalizada && !tarefaData.data_termino) {
-            return res.status(400).json({ mensagem: 'Data de término é obrigatória para tarefas finalizadas' });
-        }
+      if (tarefaData.finalizada && !tarefaData.data_termino) {
+        return res.status(400).json({ mensagem: 'Data de término é obrigatória para tarefas finalizadas' });
+      }
 
-        // Verifica se os dados fornecidos pelo repositório estão conforme esperado
-        const updatedTarefa = await TarefaRepository.update(email, {
-            name: tarefaData.name,
-            descricao: tarefaData.descricao,
-            prioridade: tarefaData.prioridade,
-            finalizada: tarefaData.finalizada,
-            data_termino: tarefaData.finalizada && tarefaData.data_termino ? new Date(tarefaData.data_termino).toISOString() : null,
-        });
+      const tarefaAtualizada = await TarefaRepository.update(email, {
+        name: tarefaData.name,
+        descricao: tarefaData.descricao,
+        prioridade: tarefaData.prioridade,
+        finalizada: tarefaData.finalizada,
+        data_termino: tarefaData.finalizada && tarefaData.data_termino ? new Date(tarefaData.data_termino).toISOString() : null,
+      });
 
-        if (!updatedTarefa) {
-            return res.status(404).json({ mensagem: 'Tarefa não encontrada' });
-        }
+      if (!tarefaAtualizada) {
+        return res.status(404).json({ mensagem: 'Tarefa não encontrada' });
+      }
 
-        return res.status(200).json({
-            mensagem: 'Tarefa atualizada com sucesso',
-            tarefa: updatedTarefa,
-        });
+      return res.status(200).json({
+        mensagem: 'Tarefa atualizada com sucesso',
+        tarefa: tarefaAtualizada,
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
-}
-async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-  try {
-      const { email } = req.params; // Receba o email da tarefa no parâmetro
+  }
+
+  async finalize(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { email } = req.params;
       if (!email) {
-          return res.status(400).json({ message: 'Email da tarefa é obrigatório' });
+        return res.status(400).json({ message: 'Email da tarefa é obrigatório' });
       }
 
-      // Utilize o método findTarefaByEmail para buscar uma tarefa associada ao email fornecido
-      const tarefa = await TarefaRepository.findTarefaByEmail(email);
-      if (!tarefa) {
-          return res.status(404).json({ message: 'Tarefa não encontrada' });
+      const tarefas = await TarefaRepository.findTarefaByEmail(email);
+      if (!tarefas || tarefas.length === 0) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
       }
 
-      // Mapeia os dados necessários para a atualização
+      const tarefa = tarefas[0]; // Supondo que você queira atualizar a primeira tarefa encontrada com este email
+
       const updatedTarefaData = {
-          finalizada: true,
-          data_termino: new Date().toISOString(),
-          name: tarefa.name,
-          descricao: tarefa.descricao ?? "", // Caso descricao seja null ou undefined, atribui uma string vazia
-          prioridade: tarefa.prioridade,
-          membroEmail: tarefa.membroEmail // MembroEmail deve ser mantido
+        finalizada: true,
+        data_termino: new Date().toISOString(),
+        name: tarefa.name,
+        descricao: tarefa.descricao ?? "",
+        prioridade: tarefa.prioridade,
+        membroEmail: tarefa.membroEmail,
       };
 
-      const updatedTarefa = await TarefaRepository.update(email, updatedTarefaData);
+      const tarefaAtualizada = await TarefaRepository.update(email, updatedTarefaData);
 
       return res.json({
-          message: 'Tarefa finalizada com sucesso',
-          tarefa: updatedTarefa,
+        message: 'Tarefa finalizada com sucesso',
+        tarefa: tarefaAtualizada,
       });
-  } catch (error) {
+    } catch (error) {
       next(error);
+    }
   }
-}
 
-async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-  try {
+  async delete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
       const { email } = req.params;
-      const tarefa = await TarefaRepository.findTarefaByEmail(email);
+      const tarefas = await TarefaRepository.findTarefaByEmail(email);
 
-      if (!tarefa) {
-          return res.status(404).json({ message: 'Tarefa não encontrada' });
+      if (!tarefas || tarefas.length === 0) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
       }
 
-      await TarefaRepository.delete(tarefa.membroEmail);
+      const deleteResult = await TarefaRepository.delete(email);
+
+      if (!deleteResult) {
+        return res.status(500).json({ message: 'Erro ao deletar tarefa' });
+      }
 
       res.status(200).json({ message: 'Tarefa deletada com sucesso' });
-  } catch (error) {
+    } catch (error) {
       next(error);
+    }
   }
-}
 
-  async listAll(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  async listAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const tarefas = await TarefaRepository.findAll();
+      const membroEmail: string | undefined = req.query.membroEmail as string;
+      let tarefas;
+      if (membroEmail) {
+        tarefas = await TarefaRepository.getTarefasByMemberEmail(membroEmail);
+      } else {
+        tarefas = await TarefaRepository.findAll();
+      }
 
-      return res.json({
-        message: 'Tarefas listadas com sucesso',
-        tarefas,
-      });
+      res.status(200).json(tarefas);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getTarefasByEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.params;
+      const tarefas = await TarefaRepository.findTarefaByEmail(email);
+
+      if (!tarefas || tarefas.length === 0) {
+        return res.status(404).json({ message: 'Nenhuma tarefa encontrada para este email' });
+      }
+
+      res.status(200).json(tarefas);
     } catch (error) {
       next(error);
     }

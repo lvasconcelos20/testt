@@ -1,14 +1,13 @@
-
-import CadastroTarefa from "./cadastroTarefas"; 
-import EdicaoTarefa from "./editTarefa";
+import React from 'react';
+import CadastroTarefa from './cadastroTarefas'; 
+import UpdateTarefa from './editTarefa';
+import ListTarefas from './listagemTarefas';
 
 function App() {
-    return (
-        <div>
-         
-            <EdicaoTarefa/>
-        </div>
-    );
+  return (
+    <ListTarefas/>
+
+  );
 }
 
-export default App; 
+export default App;
